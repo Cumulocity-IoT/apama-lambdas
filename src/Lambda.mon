@@ -1,0 +1,98 @@
+package com.industry.lambdas;
+
+using com.industry.lambdas.internals.ExpressionCompiler;
+using com.industry.lambdas.internals.PredicateFromFunction;
+using com.industry.lambdas.internals.CallFromFunction;
+using com.industry.lambdas.internals.ToFixedArgCount;
+using com.industry.lambdas.internals.ValueGetter;
+
+using com.apama.exceptions.Exception;
+
+event Lambda {
+	dictionary<string, action<> returns any> closureGetters;
+	sequence<string> argumentNames;
+	action<> returns any compiledExpression;
+	
+	static action closureFunction(string expression, any closureVars) returns action<sequence<any> > returns any {
+		dictionary<string, action<> returns any> closureGetters := new dictionary<string, action<> returns any>;
+		any valueName;
+		for valueName in closureVars.getKeys() {
+			closureGetters.add(valueName.valueToString(), ValueGetter.create(closureVars.getEntry(valueName)));
+		}
+		
+		// Handle FatArrow syntax
+		sequence<string> argsAndExpression := "=>".split(expression);
+		sequence<string> args := new sequence<string>;
+		if argsAndExpression.size() = 2 {
+			args := ",".split(argsAndExpression[0].replace("(!g)\\s",""));
+			expression := argsAndExpression[1];
+		} else if argsAndExpression.size() > 2  {
+			throw Exception("Can't have multiple: =>", "CompilationException");
+		}
+		
+		return Lambda(closureGetters, args, ExpressionCompiler(expression, closureGetters).compile()).multiArgCaller;
+	}
+	
+	static action closureFunction0(string expression, any closureVars) returns action<> returns any {
+		return ToFixedArgCount.create0(closureFunction(expression, closureVars));
+	}
+	
+	static action closureFunction1(string expression, any closureVars) returns action<any> returns any {
+		return ToFixedArgCount.create1(closureFunction(expression, closureVars));
+	}
+	
+	static action closureFunction2(string expression, any closureVars) returns action<any, any> returns any {
+		return ToFixedArgCount.create2(closureFunction(expression, closureVars));
+	}
+	
+	static action function(string expression) returns action<sequence<any> > returns any {
+		return closureFunction(expression, new any);
+	}
+	
+	static action function0(string expression) returns action<> returns any {
+		return ToFixedArgCount.create0(function(expression));
+	}
+	
+	static action function1(string expression) returns action<any> returns any {
+		return ToFixedArgCount.create1(function(expression));
+	}
+	
+	static action function2(string expression) returns action<any, any> returns any {
+		return ToFixedArgCount.create2(function(expression));
+	}
+	
+	static action closurePredicate(string expression, any closureVars) returns action<any> returns boolean {
+		return PredicateFromFunction.create(closureFunction1(expression, closureVars));
+	}
+	
+	static action predicate(string expression) returns action<any> returns boolean {
+		return closurePredicate(expression, new sequence<any>);
+	}
+	
+	static action closureCall(string expression, any closureVars) returns action<any> {
+		return CallFromFunction.create(closureFunction1(expression, closureVars));
+	}
+	
+	static action call(string expression) returns action<any> {
+		return closureCall(expression, new any);
+	}
+	
+	action multiArgCaller(sequence<any> args) returns any {
+		if argumentNames.size() > args.size() {
+			throw Exception("Too few arguments provided, must provide: " + argumentNames.size().toString(), "IllegalArgument");
+		}
+		integer i := 0;
+		while i < args.size() {
+			action<> returns any valueGetter := ValueGetter.create(args[i]);
+			closureGetters.add("$" + i.toString(), valueGetter);
+			if argumentNames.size() > i {
+				closureGetters.add(argumentNames[i], valueGetter);
+			}
+			i := i + 1;
+		}
+		if args.size() > 0 {
+			closureGetters.add("$", closureGetters["$0"]);
+		}
+		return compiledExpression();
+	}
+}

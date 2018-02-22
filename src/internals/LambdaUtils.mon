@@ -1,0 +1,60 @@
+package com.industry.lambdas.internals;
+
+using com.apama.exceptions.Exception;
+
+event PredicateFromFunction {
+	action<any> returns any function;
+	
+	static action create(action<any> returns any function) returns action<any> returns boolean {
+		return PredicateFromFunction(function).predicate;
+	}
+	
+	action predicate(any value) returns boolean {
+		switch(function(value) as result) {
+			case boolean: {
+				return result;
+			}
+			default: {
+				throw Exception("Predicate did not return a boolean, return was: " + result.toString(), "TypeException");
+			}
+		}
+	}
+}
+
+event CallFromFunction {
+	action<any> returns any function;
+	
+	static action create(action<any> returns any function) returns action<any> {
+		return CallFromFunction(function).call;
+	}
+	
+	action call(any value) {
+		any result := function(value);
+	}
+}
+
+event ToFixedArgCount {
+	action<sequence<any> > returns any function;
+
+	static action create0(action<sequence<any> > returns any function) returns action<> returns any {
+		return ToFixedArgCount(function).call0;
+	}
+	static action create1(action<sequence<any> > returns any function) returns action<any> returns any {
+		return ToFixedArgCount(function).call1;
+	}
+	static action create2(action<sequence<any> > returns any function) returns action<any, any> returns any {
+		return ToFixedArgCount(function).call2;
+	}
+	
+	action call0() returns any {
+		return function(new sequence<any>);
+	}
+	
+	action call1(any value) returns any {
+		return function([value]);
+	}
+	
+	action call2(any value1, any value2) returns any {
+		return function([value1, value2]);
+	}
+}

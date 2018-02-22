@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bundle name="Lambda" type="monitorscript" singleton="true">
+	<version>
+		<id>0.5</id>
+		<date>2018-02-22</date>
+		<author>Software AG</author>
+		<comments/>
+	</version>
+	<description>
+		Lambda Functions
+	</description>
+	<monitors>
+		<fileset dir="${APAMA_HOME}/monitors/Lambda">
+			<include name="internals/Operators.mon"/>
+			<include name="internals/Expression.mon"/>
+			<include name="internals/LambdaUtils.mon"/>
+			<include name="Lambda.mon"/>
+		</fileset>
+	</monitors>
+</bundle>
