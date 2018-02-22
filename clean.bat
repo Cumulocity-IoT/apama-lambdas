@@ -14,11 +14,13 @@ IF DEFINED APAMA_HOME (
   goto error
 )
 
-call ".\clean.bat"
+if exist "%~dp0output" (
+  rmdir /S /Q "%~dp0output"
+)
 
-engine_deploy --outputDeployDir "%~dp0output\CopyContentsToApamaInstallDir\monitors\Lambda" src
-md "%~dp0output\CopyContentsToApamaInstallDir\catalogs\bundles"
-xcopy /S "%~dp0bundles" "%~dp0output\CopyContentsToApamaInstallDir\catalogs\bundles"
+REM cd test
+
+REM pysys clean
 
 goto:eof
 
