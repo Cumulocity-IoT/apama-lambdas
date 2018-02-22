@@ -2,6 +2,17 @@ package com.industry.lambdas.internals;
 
 using com.apama.exceptions.Exception;
 
+event Undefined {
+	string name;
+	static action create(string name) returns action<> returns any {
+		return Undefined(name).getter;
+	}
+	
+	action getter() returns any {
+		throw Exception("Value: " + name + " was not provided", "UndefinedValue");
+	}
+}
+
 event ValueFromClosure {
 	dictionary<string, action<> returns any> closureGetters;
 	string objectName;
@@ -236,16 +247,27 @@ event ExpressionCompiler {
 					string beforeBracket := expression.substring(0, completedBracket.start);
 					
 					boolean isEventConstruction := false;
-					optional<string> eventName := firstMatch(beforeBracket, "(\\)|\\$|\\w|\\.)*$"); // Check to see if it's an event construction
+					optional<string> eventName := firstMatch(beforeBracket, "(\\)|\\$|\\w|\\.)+$"); // Check to see if it's an event construction
 					ifpresent eventName {
-						if eventName.matches("(\\w|\\.)*") {
+						if eventName.matches("\\w(\\w|\\.)*") {
 							// If the event is valid then we assume they meant to construct an event
 							// Otherwise it's probably a method call
 							boolean isValidEvent := true;
-							try {
-								any test := any.newInstance(eventName); // Try constructing the event to see if it is valid								
-							} catch(Exception e) {
-								isValidEvent := false;
+							
+							// Check if the event has been hidden by a variable
+							optional<string> root := firstMatch(eventName, "^\\w+");
+							ifpresent root { 
+								if closureGetters.hasKey(root) {
+									// The event has been hidden
+									isValidEvent := false;
+								}
+							}
+							if isValidEvent {
+								try {
+									any test := any.newInstance(eventName); // Try constructing the event to see if it is valid								
+								} catch(Exception e) {
+									isValidEvent := false;
+								}
 							}
 							if isValidEvent {
 								sequence<action<> returns any> args := new sequence<action<> returns any>;
