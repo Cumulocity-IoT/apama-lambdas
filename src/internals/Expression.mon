@@ -186,10 +186,10 @@ event ExpressionCompiler {
 			} else if currentCharacter = "]" {
 				BracketLocation completedBracket := brackets[brackets.size() - 1];
 				if completedBracket.isActionOrConstructorCall {
-					// This is dictionary access
+					// This is dictionary or array access
 //					string innerExpression := expression.substring(completedBracket.start + 1, i);
 //					string beforeBracket := expression.substring(0, completedBracket.start);
-					throw Exception("Can't currently access dictionary", "NotImplemented");
+					throw Exception("Can't currently access sequence/dictionary by key", "NotImplemented");
 				} else {
 					// This is sequence literal
 					string innerExpression := expression.substring(completedBracket.start + 1, i);
