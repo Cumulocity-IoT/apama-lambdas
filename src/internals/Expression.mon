@@ -18,6 +18,23 @@ event ValueFromClosure {
 	}
 }
 
+event SequenceHandler {
+	sequence<action<> returns any> sequenceValues;
+	
+	static action create(sequence<action<> returns any> sequenceValues) returns action<> returns any {
+		return SequenceHandler(sequenceValues).toSequence;
+	}
+	
+	action toSequence() returns any {
+		sequence<any> result := new sequence<any>;
+		action<> returns any value;
+		for value in sequenceValues {
+			result.append(value());
+		}
+		return result;
+	}
+}
+
 event ValueGetter {
 	any value;
 	
@@ -82,6 +99,7 @@ event ExpressionCompiler {
 	
 	action compile() returns action<> returns any {
 		literalsToPointers();
+		squareBracketsToActions();
 		bracketsToActions();
 		fieldAccessToActions();
 		unarySubtractToAction();
@@ -155,6 +173,51 @@ event ExpressionCompiler {
 		}
 	}
 	
+	action squareBracketsToActions() {
+		boolean isDictionaryAccess := false;
+		sequence<BracketLocation> brackets := new sequence<BracketLocation>;
+		integer i := 0;
+		while i < expression.length() {
+			string currentCharacter := expression.substring(i, i+1);
+			string remainingString := expression.substring(i, expression.length());
+			if currentCharacter = "[" {
+				brackets.append(BracketLocation(isDictionaryAccess, i));
+				isDictionaryAccess := false;
+			} else if currentCharacter = "]" {
+				BracketLocation completedBracket := brackets[brackets.size() - 1];
+				if completedBracket.isActionOrConstructorCall {
+					// This is dictionary access
+//					string innerExpression := expression.substring(completedBracket.start + 1, i);
+//					string beforeBracket := expression.substring(0, completedBracket.start);
+					throw Exception("Can't currently access dictionary", "NotImplemented");
+				} else {
+					// This is sequence literal
+					string innerExpression := expression.substring(completedBracket.start + 1, i);
+					
+					sequence<action<> returns any> sequenceValues := new sequence<action<> returns any>;
+					if not innerExpression.matches("\\s*") {
+						string value;
+						for value in ",".split(innerExpression) {
+							sequenceValues.append(ExpressionCompiler.create(value, closureGetters).compile());
+						}
+					}
+
+					string innerPointerName := "$_" + integer.getUnique().toString();
+					closureGetters.add(innerPointerName, SequenceHandler.create(sequenceValues));
+					
+					expression := expression.substring(0, completedBracket.start) + innerPointerName + expression.substring(i + 1, expression.length());
+					i := completedBracket.start + innerPointerName.length() - 1;
+				}
+				brackets.remove(brackets.size() - 1);
+			} else if currentCharacter.matches("\\$|\\w") {
+				isDictionaryAccess := true;
+			} else {
+				isDictionaryAccess := false;
+			}
+			i := i + 1;
+		}
+	}
+	
 	action bracketsToActions() {
 		boolean isActionOrConstructorCall := false;
 		sequence<BracketLocation> brackets := new sequence<BracketLocation>;
@@ -210,7 +273,7 @@ event ExpressionCompiler {
 					string innerPointerName := "$_" + integer.getUnique().toString();
 					closureGetters.add(innerPointerName, ExpressionCompiler.create(innerExpression, closureGetters).compile());
 					expression := expression.substring(0, completedBracket.start) + innerPointerName + expression.substring(i + 1, expression.length());
-					i := completedBracket.start + innerPointerName.length();
+					i := completedBracket.start + innerPointerName.length() - 1;
 				}
 				brackets.remove(brackets.size() - 1);
 			} else if currentCharacter.matches("\\$|\\w") {
