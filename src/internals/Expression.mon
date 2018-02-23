@@ -68,10 +68,44 @@ event EventConstructor {
 	
 	action construct() returns any {
 		any result := any.newInstance(eventName);
+		sequence<string> fieldTypes := result.getFieldTypes();
 		integer i := 0;
 		string fieldName;
 		for fieldName in result.getFieldNames() {
-			result.setField(fieldName, args[i]());
+			any value := args[i]();
+			string fieldType := fieldTypes[i];
+			if fieldType = "float" {
+				switch(value as v) {
+					case decimal: {
+						value := v.toFloat();
+					}
+					case integer: {
+						value := v.toFloat();
+					}
+					default: {}
+				}
+			} else if fieldType = "decimal" {
+				switch(value as v) {
+					case float: {
+						value := v.toDecimal();
+					}
+					case integer: {
+						value := v.toDecimal();
+					}
+					default: {}
+				}				
+			} else if fieldType = "integer" {
+				switch(value as v) {
+					case float: {
+						value := v.round();
+					}
+					case decimal: {
+						value := v.round();
+					}
+					default: {}
+				}				
+			}			
+			result.setField(fieldName, value);
 			i := i + 1;
 		}
 		return result;
