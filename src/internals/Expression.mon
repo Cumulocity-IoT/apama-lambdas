@@ -104,7 +104,9 @@ event EventConstructor {
 					}
 					default: {}
 				}				
-			}			
+			} else if fieldType = "string" {
+				value := value.valueToString();
+			}
 			result.setField(fieldName, value);
 			i := i + 1;
 		}
