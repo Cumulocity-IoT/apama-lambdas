@@ -82,6 +82,9 @@ event EventConstructor {
 					case integer: {
 						value := v.toFloat();
 					}
+					case string: {
+						value := float.parse(v);
+					}
 					default: {}
 				}
 			} else if fieldType = "decimal" {
@@ -92,6 +95,9 @@ event EventConstructor {
 					case integer: {
 						value := v.toDecimal();
 					}
+					case string: {
+						value := decimal.parse(v);
+					}
 					default: {}
 				}				
 			} else if fieldType = "integer" {
@@ -101,6 +107,9 @@ event EventConstructor {
 					}
 					case decimal: {
 						value := v.round();
+					}
+					case string: {
+						value := integer.parse(v);
 					}
 					default: {}
 				}				
