@@ -126,17 +126,17 @@ event EventConstructor {
 event FieldAccess {
 	dictionary<string, action<> returns any> closureGetters;
 	string objectName;
-	string fieldName;
+	action<> returns any fieldKey;
 	
-	static action create(dictionary<string, action<> returns any> closureGetters, string objectName, string fieldName) returns action<> returns any {
-		return FieldAccess(closureGetters, objectName, fieldName).callback;
+	static action create(dictionary<string, action<> returns any> closureGetters, string objectName, action<> returns any fieldKey) returns action<> returns any {
+		return FieldAccess(closureGetters, objectName, fieldKey).callback;
 	}
 	
 	action callback() returns any {
 		if not closureGetters.hasKey(objectName) {
 			throw Exception("Unknown object: " + objectName, "CompilationException");
 		}
-		return closureGetters[objectName]().getEntry(fieldName);
+		return closureGetters[objectName]().getEntry(fieldKey());
 	}
 }
 
@@ -203,7 +203,8 @@ event ExpressionCompiler {
 				}
 				expression := expression.substring(0, i) + substitutionName + expression.substring(i + lengthOfValue, expression.length());
 				continue;
-			} else if currentCharacter = "\"" { // Check for string values
+			} else if currentCharacter = "\"" or currentCharacter = "'" { // Check for string values
+				string quoteType := currentCharacter;
 				boolean foundEnd := false;
 				integer lengthOfString := 1;
 				while lengthOfString < remainingString.length() {
@@ -211,17 +212,17 @@ event ExpressionCompiler {
 					lengthOfString := lengthOfString + 1;
 					if currentCharacter = "\\" { // Skip escaped characters
 						lengthOfString := lengthOfString + 1;
-					} else if currentCharacter = "\"" { // Found end of string
+					} else if currentCharacter = quoteType { // Found end of string
 						foundEnd := true;
 						break;
 					}
 				}
 				if not foundEnd {
-					throw Exception("String value not closed, no matching: \"", "CompilationException");
+					throw Exception("String value not closed, no matching: " + quoteType, "CompilationException");
 				}
-				string valueString := remainingString.substring(0, lengthOfString);
+				string valueString := remainingString.substring(1, lengthOfString-1);
 				string substitutionName := "$_" + integer.getUnique().toString();
-				closureGetters.add(substitutionName, ValueGetter.create(string.parse(valueString)));
+				closureGetters.add(substitutionName, ValueGetter.create(string.parse("\"" + valueString + "\"")));
 				expression := expression.substring(0, i) + substitutionName + expression.substring(i + lengthOfString, expression.length());
 				continue;
 			}
@@ -242,10 +243,7 @@ event ExpressionCompiler {
 			} else if currentCharacter = "]" {
 				BracketLocation completedBracket := brackets[brackets.size() - 1];
 				if completedBracket.isActionOrConstructorCall {
-					// This is dictionary or array access
-//					string innerExpression := expression.substring(completedBracket.start + 1, i);
-//					string beforeBracket := expression.substring(0, completedBracket.start);
-					throw Exception("Can't currently access sequence/dictionary by key", "NotImplemented");
+					// This is field, dictionary, or array access (it is handled in the fieldAccess section)
 				} else {
 					// This is sequence literal
 					string innerExpression := expression.substring(completedBracket.start + 1, i);
@@ -363,9 +361,32 @@ event ExpressionCompiler {
 				string fieldName := remainingString.substring(1, remainingString.length()).search("^(\\$|\\w)+")[0];
 				// TODO: handle methodCalling
 				string actionPointerName := "$_" + integer.getUnique().toString();
-				closureGetters.add(actionPointerName, FieldAccess.create(closureGetters, objectName, fieldName));
+				closureGetters.add(actionPointerName, FieldAccess.create(closureGetters, objectName, ValueGetter.create(fieldName)));
 				expression := expression.substring(0, i - objectName.length()) + actionPointerName + expression.substring(i + fieldName.length() + 1, expression.length());
 				i := i - objectName.length() + actionPointerName.length() - 1;
+			} else if currentCharacter = "[" and i > 0 and expression.substring(i-1, i).matches("(\\$|\\w)") { // Check for fieldAccess via sqrBrackets
+				integer bracketCount := 1;
+				integer j := i + 1;
+				while j < expression.length() {
+					string currentCharacter := expression.substring(j, j+1);
+					if currentCharacter = "[" {
+						bracketCount := bracketCount + 1;
+					} else if currentCharacter = "]" {
+						bracketCount := bracketCount - 1;
+						if bracketCount = 0 {
+							string objectName := processedString.search("(\\$|\\w)+$")[0];
+							string fieldKeyExp := expression.substring(i + 1, j);
+							string actionPointerName := "$_" + integer.getUnique().toString();
+							closureGetters.add(actionPointerName, FieldAccess.create(closureGetters, objectName, ExpressionCompiler.create(fieldKeyExp, closureGetters).compile()));
+							expression := expression.substring(0, i - objectName.length()) + actionPointerName + expression.substring(j + 1, expression.length());
+							i := i - objectName.length() + actionPointerName.length() - 1;
+						}
+					}
+					j := j + 1;
+				}
+				if bracketCount > 0 {
+					throw Exception("Unmatched bracket '['", "CompilationException");
+				}
 			}
 			i := i + 1;
 		}
