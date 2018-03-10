@@ -16,7 +16,8 @@ IF DEFINED APAMA_HOME (
 
 call ".\clean.bat"
 
-engine_deploy --outputDeployDir "%~dp0output\CopyContentsToApamaInstallDir\monitors\Lambda" src
+md "%~dp0output\CopyContentsToApamaInstallDir\monitors\Lambda"
+engine_deploy --outputCDP "%~dp0output\CopyContentsToApamaInstallDir\monitors\Lambda\Lambda.cdp" src
 md "%~dp0output\CopyContentsToApamaInstallDir\catalogs\bundles"
 xcopy /S "%~dp0bundles" "%~dp0output\CopyContentsToApamaInstallDir\catalogs\bundles"
 

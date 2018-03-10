@@ -11,10 +11,7 @@
 	</description>
 	<monitors>
 		<fileset dir="${APAMA_HOME}/monitors/Lambda">
-			<include name="internals/Operators.mon"/>
-			<include name="internals/Expression.mon"/>
-			<include name="internals/LambdaUtils.mon"/>
-			<include name="Lambda.mon"/>
+			<include name="Lambda.cdp"/>
 		</fileset>
 	</monitors>
 </bundle>
