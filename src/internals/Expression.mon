@@ -13,6 +13,24 @@ event Undefined {
 	}
 }
 
+event TernaryHandler {
+	action<> returns any condition;
+	action<> returns any left;
+	action<> returns any right;
+	
+	static action create(action<> returns any condition, action<> returns any left, action<> returns any right) returns action<> returns any {
+		return TernaryHandler(condition, left, right).ternary;
+	}
+	
+	action ternary() returns any {
+		if <boolean> condition() {
+			return left();
+		} else {
+			return right();
+		}
+	}
+}
+
 event ValueFromClosure {
 	dictionary<string, action<> returns any> closureGetters;
 	string objectName;
@@ -162,6 +180,7 @@ event ExpressionCompiler {
 		operatorsToActions();
 		unaryNegateToActions();
 		booleanOperatorsToActions();
+		ternaryOperatorToActions();
 		return toAction();
 	}
 	
@@ -480,6 +499,40 @@ event ExpressionCompiler {
 				}
 				i := i + 1;
 			}
+		}
+	}
+	
+	action ternaryOperatorToActions() {
+		integer count := 0;
+		integer ternaryStart := 0;
+		integer i := 0;
+		while i < expression.length() {
+			string currentCharacter := expression.substring(i, i+1);
+			string processedString := expression.substring(0, i);
+			string remainingString := expression.substring(i, expression.length());
+			if currentCharacter = "?" {
+				if count = 0 {
+					ternaryStart := i;
+				}
+				count := count + 1;
+			} else if currentCharacter = ":" {
+				count := count - 1;
+				if count = 0 {
+					string conditionString := expression.substring(0, ternaryStart);
+					string leftString := expression.substring(ternaryStart + 1, i);
+					string rightString := expression.substring(i + 1, expression.length());
+
+					action<> returns any condition := ExpressionCompiler.create(conditionString, closureGetters).compile();
+					action<> returns any left := ExpressionCompiler.create(leftString, closureGetters).compile();
+					action<> returns any right := ExpressionCompiler.create(rightString, closureGetters).compile();
+					
+					string actionPointerName := "$_" + integer.getUnique().toString();
+					closureGetters.add(actionPointerName, TernaryHandler.create(condition, left, right));
+					expression := actionPointerName;
+					return;
+				}
+			}
+			i := i + 1;
 		}
 	}
 	
