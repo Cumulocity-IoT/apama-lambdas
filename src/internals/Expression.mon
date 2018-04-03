@@ -76,6 +76,12 @@ event ValueGetter {
 	}
 }
 
+event CurrentTime {
+	static action get() returns any {
+		return currentTime;
+	}
+}
+
 event EventConstructor {
 	string eventName;
 	sequence<action<> returns any> args;
@@ -168,7 +174,13 @@ event ExpressionCompiler {
 	dictionary<string, action<> returns any> closureGetters;
 	
 	static action create(string expression, dictionary<string, action<> returns any> closureGetters) returns ExpressionCompiler {
+		addLanguageValuesToClosure(closureGetters);
 		return ExpressionCompiler(expression, closureGetters);
+	}
+	
+	static action addLanguageValuesToClosure(dictionary<string, action<> returns any> closureGetters) {
+		// Must use getOrAdd, we don't want to overwrite any user provided values
+		action<> returns any discard := closureGetters.getOrAdd("currentTime", CurrentTime.get);
 	}
 	
 	action compile() returns action<> returns any {

@@ -37,7 +37,7 @@ event Lambda {
 			closureGetters.add(argName, Undefined.create(argName));	
 		}
 		
-		return Lambda(closureGetters, args, ExpressionCompiler(expression, closureGetters).compile()).multiArgCaller;
+		return Lambda(closureGetters, args, ExpressionCompiler.create(expression, closureGetters).compile()).multiArgCaller;
 	}
 	
 	static action closureFunction0(string expression, any closureVars) returns action<> returns any {
