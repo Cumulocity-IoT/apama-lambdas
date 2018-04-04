@@ -8,12 +8,15 @@ using com.industry.lambdas.internals.ValueGetter;
 using com.industry.lambdas.internals.Undefined;
 
 using com.apama.exceptions.Exception;
+using com.apama.exceptions.StackTraceElement;
 
 event Lambda {
 	dictionary<string, action<> returns any> closureGetters;
 	sequence<string> argumentNames;
 	dictionary<string, sequence<string> > destructuredArgs;
 	action<> returns any compiledExpression;
+	
+	sequence<StackTraceElement> definitionStackTrace;
 	
 	static action closureFunction(string expression, any closureVars) returns action<sequence<any> > returns any {
 		dictionary<string, action<> returns any> closureGetters := new dictionary<string, action<> returns any>;
@@ -64,7 +67,19 @@ event Lambda {
 			closureGetters.add(argName, Undefined.create(argName));	
 		}
 		
-		return Lambda(closureGetters, args, destructuredArgs, ExpressionCompiler.create(expression, closureGetters).compile()).multiArgCaller;
+		try {
+			throw Exception("Lambda Definition", "LambdaException");
+		} catch(Exception e) {
+			sequence<StackTraceElement> usefulStackTrace := new sequence<StackTraceElement>;
+			StackTraceElement s;
+			for s in e.getStackTrace() {
+				if s.getTypeName().find("com.industry.lambdas") != 0 {
+					usefulStackTrace.append(s);
+				}
+			}
+			
+			return Lambda(closureGetters, args, destructuredArgs, ExpressionCompiler.create(expression, closureGetters).compile(), usefulStackTrace).multiArgCaller;
+		}
 	}
 	
 	static action closureFunction0(string expression, any closureVars) returns action<> returns any {
@@ -112,40 +127,49 @@ event Lambda {
 	}
 	
 	action multiArgCaller(sequence<any> args) returns any {
-		integer i := 0;
-		while i < args.size() {
-			action<> returns any valueGetter := ValueGetter.create(args[i]);
-			closureGetters.add("$" + i.toString(), valueGetter);
-			if argumentNames.size() > i {
-				string argName := argumentNames[i];
-				if destructuredArgs.hasKey(argName) {
-					// It's a destructured arg
-					sequence<string> destructuredArgNames := destructuredArgs[argName];
-					integer j := 0;
-					while j < destructuredArgNames.size() {
-						if args[i].getTypeName().find("sequence") = 0 {
-							action<> returns any destructuredValueGetter;
-							try {
-								destructuredValueGetter := ValueGetter.create(args[i].getEntry(j));
-							} catch (Exception e) {
-								destructuredValueGetter := Undefined.create(destructuredArgNames[j]);
+		try {
+			integer i := 0;
+			while i < args.size() {
+				action<> returns any valueGetter := ValueGetter.create(args[i]);
+				closureGetters.add("$" + i.toString(), valueGetter);
+				if argumentNames.size() > i {
+					string argName := argumentNames[i];
+					if destructuredArgs.hasKey(argName) {
+						// It's a destructured arg
+						sequence<string> destructuredArgNames := destructuredArgs[argName];
+						integer j := 0;
+						while j < destructuredArgNames.size() {
+							if args[i].getTypeName().find("sequence") = 0 {
+								action<> returns any destructuredValueGetter;
+								try {
+									destructuredValueGetter := ValueGetter.create(args[i].getEntry(j));
+								} catch (Exception e) {
+									destructuredValueGetter := Undefined.create(destructuredArgNames[j]);
+								}
+								closureGetters.add(destructuredArgNames[j], destructuredValueGetter);
+							} else {
+								throw Exception("Can only destructure a sequence, was: " + args[i].valueToString(), "RuntimeException");
 							}
-							closureGetters.add(destructuredArgNames[j], destructuredValueGetter);
-						} else {
-							throw Exception("Can only destructure a sequence, was: " + args[i].valueToString(), "RuntimeException");
+							j := j + 1;
 						}
-						j := j + 1;
+					} else {
+						// It's a normal arg
+						closureGetters.add(argName, valueGetter);
 					}
-				} else {
-					// It's a normal arg
-					closureGetters.add(argName, valueGetter);
 				}
+				i := i + 1;
 			}
-			i := i + 1;
+			if args.size() > 0 {
+				closureGetters.add("$", closureGetters["$0"]);
+			}
+			return compiledExpression();
+		} catch(Exception e) {
+			string definitionStString := "Lambda Definition:";
+			StackTraceElement s;
+			for s in definitionStackTrace {
+				definitionStString := definitionStString + "\n\t" + s.getTypeName() + "." + s.getActionName() + " " + s.getFilename() + ":" + s.getLineNumber().toString();
+			}
+			throw Exception(e.getMessage() + "\n" + definitionStString + "\nOriginal Exception: " + e.toStringWithStackTrace(), e.getType());
 		}
-		if args.size() > 0 {
-			closureGetters.add("$", closureGetters["$0"]);
-		}
-		return compiledExpression();
 	}
 }
