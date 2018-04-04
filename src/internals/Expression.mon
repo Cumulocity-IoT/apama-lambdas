@@ -48,19 +48,48 @@ event ValueFromClosure {
 }
 
 event SequenceHandler {
-	sequence<action<> returns any> sequenceValues;
+	sequence<action<> returns sequence<any> > sequenceValues;
 	
-	static action create(sequence<action<> returns any> sequenceValues) returns action<> returns any {
+	static action create(sequence<action<> returns sequence<any> > sequenceValues) returns action<> returns any {
 		return SequenceHandler(sequenceValues).toSequence;
 	}
 	
 	action toSequence() returns any {
 		sequence<any> result := new sequence<any>;
-		action<> returns any value;
+		action<> returns sequence<any> value;
 		for value in sequenceValues {
-			result.append(value());
+			result.appendSequence(value());
 		}
 		return result;
+	}
+}
+
+event SequenceSingleValueHandler {
+	action<> returns any value;
+	
+	static action create(action<> returns any value) returns action<> returns sequence<any> {
+		return SequenceSingleValueHandler(value).toValue;
+	}
+	
+	action toValue() returns sequence<any> {
+		return [value()];
+	}
+}
+
+event SequenceMultipleValueHandler {
+	action<> returns any values;
+	
+	static action create(action<> returns any values) returns action<> returns sequence<any> {
+		return SequenceMultipleValueHandler(values).toValue;
+	}
+	
+	action toValue() returns sequence<any> {
+		any resolvedValues := values();
+		if resolvedValues.getTypeName().find("sequence") = 0 {
+			return resolvedValues.getEntries();
+		} else {
+			throw Exception("Can't spread: " + resolvedValues.valueToString(), "RuntimeException");
+		}
 	}
 }
 
@@ -279,11 +308,18 @@ event ExpressionCompiler {
 					// This is sequence literal
 					string innerExpression := expression.substring(completedBracket.start + 1, i);
 					
-					sequence<action<> returns any> sequenceValues := new sequence<action<> returns any>;
+					sequence<action<> returns sequence<any> > sequenceValues := new sequence<action<> returns sequence<any> >;
 					if not innerExpression.matches("\\s*") {
 						string value;
 						for value in ",".split(innerExpression) {
-							sequenceValues.append(ExpressionCompiler.create(value, closureGetters).compile());
+							value := value.ltrim();
+							if value.substring(0,3) = "..." {
+								// Handle spread operator
+								value := value.substring(3, value.length());
+								sequenceValues.append(SequenceMultipleValueHandler.create(ExpressionCompiler.create(value, closureGetters).compile()));
+							} else {
+								sequenceValues.append(SequenceSingleValueHandler.create(ExpressionCompiler.create(value, closureGetters).compile()));
+							}
 						}
 					}
 
