@@ -313,7 +313,7 @@ event ExpressionCompiler {
 						string value;
 						for value in ",".split(innerExpression) {
 							value := value.ltrim();
-							if value.substring(0,3) = "..." {
+							if value.length() > 3 and value.substring(0,3) = "..." {
 								// Handle spread operator
 								value := value.substring(3, value.length());
 								sequenceValues.append(SequenceMultipleValueHandler.create(ExpressionCompiler.create(value, closureGetters).compile()));
