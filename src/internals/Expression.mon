@@ -432,21 +432,21 @@ event ExpressionCompiler {
 	}
 	
 	action operatorToActions(string operator) {
-		dictionary<string, action<dictionary<string, action<> returns any>, string, string> returns action<> returns any> operatorHandlers := {
-			"%": OperatorHandler.create(Operators.mod),
-			"/": OperatorHandler.create(Operators.divide),
-			"*": OperatorHandler.create(Operators.multiply),
-			"-": OperatorHandler.create(Operators.minus),
-			"+": OperatorHandler.create(Operators.plus),
-			"=": OperatorHandler.create(Operators.equals),
-			"!=": OperatorHandler.create(Operators.notEquals),
-			">=": OperatorHandler.create(Operators.greaterThanEq),
-			">": OperatorHandler.create(Operators.greaterThan),
-			"<=": OperatorHandler.create(Operators.lessThanEq),
-			"<": OperatorHandler.create(Operators.lessThan),
-			"and": OperatorHandler.create(Operators.logicalAnd),
-			"xor": OperatorHandler.create(Operators.logicalXor),
-			"or": OperatorHandler.create(Operators.logicalOr)
+		dictionary<string, action<any, any> returns any> operators := {
+			"%": Operators.mod,
+			"/": Operators.divide,
+			"*": Operators.multiply,
+			"-": Operators.minus,
+			"+": Operators.plus,
+			"=": Operators.equals,
+			"!=": Operators.notEquals,
+			">=": Operators.greaterThanEq,
+			">": Operators.greaterThan,
+			"<=": Operators.lessThanEq,
+			"<": Operators.lessThan,
+			"and": Operators.logicalAnd,
+			"xor": Operators.logicalXor,
+			"or": Operators.logicalOr
 		};
 		
 		integer i := 0;
@@ -460,7 +460,7 @@ event ExpressionCompiler {
 					optional<string> rightObject := firstMatch(remainingString.substring(operator.length(), remainingString.length()), "^\\s*(\\$|\\w)+");
 					ifpresent rightObject {
 						string actionPointerName := "$_" + integer.getUnique().toString();
-						closureGetters.add(actionPointerName, operatorHandlers[operator](closureGetters, leftObject.rtrim(), rightObject.ltrim()));
+						closureGetters.add(actionPointerName, OperatorHandler.create(operators[operator])(closureGetters, leftObject.rtrim(), rightObject.ltrim()));
 						expression := expression.substring(0, i - leftObject.length()) + actionPointerName + expression.substring(i + rightObject.length() + operator.length(), expression.length());
 						i := i - leftObject.length() + actionPointerName.length() - 1;
 					}
