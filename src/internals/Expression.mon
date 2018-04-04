@@ -432,7 +432,7 @@ event ExpressionCompiler {
 	}
 	
 	action operatorToActions(string operator) {
-		dictionary<string, action<any, any> returns any> operators := {
+		dictionary<string, action<action<> returns any, action<> returns any> returns any> operators := {
 			"%": Operators.mod,
 			"/": Operators.divide,
 			"*": Operators.multiply,
@@ -460,7 +460,7 @@ event ExpressionCompiler {
 					optional<string> rightObject := firstMatch(remainingString.substring(operator.length(), remainingString.length()), "^\\s*(\\$|\\w)+");
 					ifpresent rightObject {
 						string actionPointerName := "$_" + integer.getUnique().toString();
-						closureGetters.add(actionPointerName, OperatorHandler.create(operators[operator])(closureGetters, leftObject.rtrim(), rightObject.ltrim()));
+						closureGetters.add(actionPointerName, OperatorHandler.create(operators[operator], closureGetters, leftObject.rtrim(), rightObject.ltrim()));
 						expression := expression.substring(0, i - leftObject.length()) + actionPointerName + expression.substring(i + rightObject.length() + operator.length(), expression.length());
 						i := i - leftObject.length() + actionPointerName.length() - 1;
 					}

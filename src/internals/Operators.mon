@@ -70,19 +70,12 @@ event UnaryNegate {
 
 event OperatorHandler {
 	dictionary<string, action<> returns any> closureGetters;
-	action<any, any> returns any operator;
+	action<action<> returns any, action<> returns any> returns any operator;
 	string leftObject;
 	string rightObject;
 	
-	static action create(action<any, any> returns any operator) returns action<dictionary<string, action<> returns any>, string, string> returns action<> returns any {
-		return OperatorHandler(new dictionary<string, action<> returns any>, operator, new string, new string).setup;
-	}
-	
-	action setup(dictionary<string, action<> returns any> closureGetters, string leftObject, string rightObject) returns action<> returns any {
-		self.closureGetters := closureGetters;
-		self.leftObject := leftObject;
-		self.rightObject := rightObject;
-		return callback;
+	static action create(action<action<> returns any, action<> returns any> returns any operator, dictionary<string, action<> returns any> closureGetters, string leftObject, string rightObject) returns action<> returns any {
+		return OperatorHandler(closureGetters, operator, leftObject, rightObject).callback;
 	}
 	
 	action callback() returns any {
@@ -92,575 +85,663 @@ event OperatorHandler {
 		if not closureGetters.hasKey(rightObject) {
 			throw Exception("Unknown object: " + rightObject, "CompilationException");
 		}
-		any left := closureGetters[leftObject]();
-		any right := closureGetters[rightObject]();
-		return operator(left, right);
+		return operator(closureGetters[leftObject], closureGetters[rightObject]);
 	}
 }
 
 event Operators {
-	static action equals(any left, any right) returns any {
-		switch(left) {
+	static action equals(action<> returns any left, action<> returns any right) returns any {
+		any leftVal := left();
+		any rightVal := right();
+		switch(leftVal) {
 			case integer: {
-				switch(right) {
+				switch(rightVal) {
 					case integer: {
-						return left = right;
+						return leftVal = rightVal;
 					}
 					case decimal: {
-						return left.toDecimal() = right;
+						return leftVal.toDecimal() = rightVal;
 					}
 					case float: {
-						return left.toFloat() = right;
+						return leftVal.toFloat() = rightVal;
 					}
 					default: {
-						return <any>left = right;
+						return <any>leftVal = rightVal;
 					}
 				}
 			}
 			case decimal: {
-				switch(right) {
+				switch(rightVal) {
 					case integer: {
-						return left = right.toDecimal();
+						return leftVal = rightVal.toDecimal();
 					}
 					case decimal: {
-						return left = right;
+						return leftVal = rightVal;
 					}
 					case float: {
-						return OperatorUtils.decimalEqFloat(left, right);
+						return OperatorUtils.decimalEqFloat(leftVal, rightVal);
 					}
 					default: {
-						return <any>left = right;
+						return <any>leftVal = rightVal;
 					}
 				}
 			}
 			case float: {
-				switch(right) {
+				switch(rightVal) {
 					case integer: {
-						return left = right.toFloat();
+						return leftVal = rightVal.toFloat();
 					}
 					case decimal: {
-						return OperatorUtils.decimalEqFloat(right, left);
+						return OperatorUtils.decimalEqFloat(rightVal, leftVal);
 					}
 					case float: {
-						return left = right;
+						return leftVal = rightVal;
 					}
 					default: {
-						return <any>left = right;
+						return <any>leftVal = rightVal;
 					}
 				}
 			}
 			default: {
-				return left = right;
+				return leftVal = rightVal;
 			}
 		}
 	}
 	
-	static action greaterThan(any left, any right) returns any {
-		switch(left) {
+	static action greaterThan(action<> returns any left, action<> returns any right) returns any {
+		any leftVal := left();
+		any rightVal := right();
+		switch(leftVal) {
 			case integer: {
-				switch(right) {
+				switch(rightVal) {
 					case integer: {
-						return left > right;
+						return leftVal > rightVal;
 					}
 					case decimal: {
-						return left.toDecimal() > right;
+						return leftVal.toDecimal() > rightVal;
 					}
 					case float: {
-						return left.toFloat() > right;
+						return leftVal.toFloat() > rightVal;
 					}
 					default: {
-						return <any>left > right;
+						return <any>leftVal > rightVal;
 					}
 				}
 			}
 			case decimal: {
-				switch(right) {
+				switch(rightVal) {
 					case integer: {
-						return left > right.toDecimal();
+						return leftVal > rightVal.toDecimal();
 					}
 					case decimal: {
-						return left > right;
+						return leftVal > rightVal;
 					}
 					case float: {
-						return left.toFloat() > right and not OperatorUtils.decimalEqFloat(left, right);
+						return leftVal.toFloat() > rightVal and not OperatorUtils.decimalEqFloat(leftVal, rightVal);
 					}
 					default: {
-						return <any>left > right;
+						return <any>leftVal > rightVal;
 					}
 				}
 			}
 			case float: {
-				switch(right) {
+				switch(rightVal) {
 					case integer: {
-						return left > right.toFloat();
+						return leftVal > rightVal.toFloat();
 					}
 					case decimal: {
-						return left > right.toFloat() and not OperatorUtils.decimalEqFloat(right, left);
+						return leftVal > rightVal.toFloat() and not OperatorUtils.decimalEqFloat(rightVal, leftVal);
 					}
 					case float: {
-						return left > right;
+						return leftVal > rightVal;
 					}
 					default: {
-						return <any>left > right;
+						return <any>leftVal > rightVal;
 					}
 				}
 			}
 			default: {
-				return left > right;
+				return leftVal > rightVal;
 			}
 		}
 	}
 	
-	static action lessThan(any left, any right) returns any {
-		switch(left) {
+	static action lessThan(action<> returns any left, action<> returns any right) returns any {
+		any leftVal := left();
+		any rightVal := right();
+		switch(leftVal) {
 			case integer: {
-				switch(right) {
+				switch(rightVal) {
 					case integer: {
-						return left < right;
+						return leftVal < rightVal;
 					}
 					case decimal: {
-						return left.toDecimal() < right;
+						return leftVal.toDecimal() < rightVal;
 					}
 					case float: {
-						return left.toFloat() < right;
+						return leftVal.toFloat() < rightVal;
 					}
 					default: {
-						return <any>left < right;
+						return <any>leftVal < rightVal;
 					}
 				}
 			}
 			case decimal: {
-				switch(right) {
+				switch(rightVal) {
 					case integer: {
-						return left < right.toDecimal();
+						return leftVal < rightVal.toDecimal();
 					}
 					case decimal: {
-						return left < right;
+						return leftVal < rightVal;
 					}
 					case float: {
-						return left.toFloat() < right and not OperatorUtils.decimalEqFloat(left, right);
+						return leftVal.toFloat() < rightVal and not OperatorUtils.decimalEqFloat(leftVal, rightVal);
 					}
 					default: {
-						return <any>left < right;
+						return <any>leftVal < rightVal;
 					}
 				}
 			}
 			case float: {
-				switch(right) {
+				switch(rightVal) {
 					case integer: {
-						return left < right.toFloat();
+						return leftVal < rightVal.toFloat();
 					}
 					case decimal: {
-						return left < right.toFloat() and not OperatorUtils.decimalEqFloat(right, left);
+						return leftVal < rightVal.toFloat() and not OperatorUtils.decimalEqFloat(rightVal, leftVal);
 					}
 					case float: {
-						return left < right;
+						return leftVal < rightVal;
 					}
 					default: {
-						return <any>left < right;
+						return <any>leftVal < rightVal;
 					}
 				}
 			}
 			default: {
-				return left < right;
+				return leftVal < rightVal;
 			}
 		}
 	}
 	
-	static action greaterThanEq(any left, any right) returns any {
-		switch(left) {
+	static action greaterThanEq(action<> returns any left, action<> returns any right) returns any {
+		any leftVal := left();
+		any rightVal := right();
+		switch(leftVal) {
 			case integer: {
-				switch(right) {
+				switch(rightVal) {
 					case integer: {
-						return left > right;
+						return leftVal > rightVal;
 					}
 					case decimal: {
-						return left.toDecimal() > right;
+						return leftVal.toDecimal() > rightVal;
 					}
 					case float: {
-						return left.toFloat() > right;
+						return leftVal.toFloat() > rightVal;
 					}
 					default: {
-						return <any>left > right;
+						return <any>leftVal > rightVal;
 					}
 				}
 			}
 			case decimal: {
-				switch(right) {
+				switch(rightVal) {
 					case integer: {
-						return left > right.toDecimal();
+						return leftVal > rightVal.toDecimal();
 					}
 					case decimal: {
-						return left > right;
+						return leftVal > rightVal;
 					}
 					case float: {
-						return left.toFloat() > right or OperatorUtils.decimalEqFloat(left, right);
+						return leftVal.toFloat() > rightVal or OperatorUtils.decimalEqFloat(leftVal, rightVal);
 					}
 					default: {
-						return <any>left > right;
+						return <any>leftVal > rightVal;
 					}
 				}
 			}
 			case float: {
-				switch(right) {
+				switch(rightVal) {
 					case integer: {
-						return left > right.toFloat();
+						return leftVal > rightVal.toFloat();
 					}
 					case decimal: {
-						return left > right.toFloat() or OperatorUtils.decimalEqFloat(right, left);
+						return leftVal > rightVal.toFloat() or OperatorUtils.decimalEqFloat(rightVal, leftVal);
 					}
 					case float: {
-						return left > right;
+						return leftVal > rightVal;
 					}
 					default: {
-						return <any>left > right;
+						return <any>leftVal > rightVal;
 					}
 				}
 			}
 			default: {
-				return left > right;
+				return leftVal > rightVal;
 			}
 		}
 	}
 
-	static action lessThanEq(any left, any right) returns any {
-		switch(left) {
+	static action lessThanEq(action<> returns any left, action<> returns any right) returns any {
+		any leftVal := left();
+		any rightVal := right();
+		switch(leftVal) {
 			case integer: {
-				switch(right) {
+				switch(rightVal) {
 					case integer: {
-						return left < right;
+						return leftVal < rightVal;
 					}
 					case decimal: {
-						return left.toDecimal() < right;
+						return leftVal.toDecimal() < rightVal;
 					}
 					case float: {
-						return left.toFloat() < right;
+						return leftVal.toFloat() < rightVal;
 					}
 					default: {
-						return <any>left < right;
+						return <any>leftVal < rightVal;
 					}
 				}
 			}
 			case decimal: {
-				switch(right) {
+				switch(rightVal) {
 					case integer: {
-						return left < right.toDecimal();
+						return leftVal < rightVal.toDecimal();
 					}
 					case decimal: {
-						return left < right;
+						return leftVal < rightVal;
 					}
 					case float: {
-						return left.toFloat() < right or OperatorUtils.decimalEqFloat(left, right);
+						return leftVal.toFloat() < rightVal or OperatorUtils.decimalEqFloat(leftVal, rightVal);
 					}
 					default: {
-						return <any>left < right;
+						return <any>leftVal < rightVal;
 					}
 				}
 			}
 			case float: {
-				switch(right) {
+				switch(rightVal) {
 					case integer: {
-						return left < right.toFloat();
+						return leftVal < rightVal.toFloat();
 					}
 					case decimal: {
-						return left < right.toFloat() or OperatorUtils.decimalEqFloat(right, left);
+						return leftVal < rightVal.toFloat() or OperatorUtils.decimalEqFloat(rightVal, leftVal);
 					}
 					case float: {
-						return left < right;
+						return leftVal < rightVal;
 					}
 					default: {
-						return <any>left < right;
+						return <any>leftVal < rightVal;
 					}
 				}
 			}
 			default: {
-				return left < right;
+				return leftVal < rightVal;
 			}
 		}
 	}
 	
-	static action plus(any left, any right) returns any {
-		switch(left) {
+	static action plus(action<> returns any left, action<> returns any right) returns any {
+		any leftVal := left();
+		any rightVal := right();
+		switch(leftVal) {
 			case decimal: {
-				switch(right) {
+				switch(rightVal) {
 					case decimal: {
-						return left + right;
+						return leftVal + rightVal;
 					}
 					case float: {
-						return left.toFloat() + right;
+						return leftVal.toFloat() + rightVal;
 					}
 					case integer: {
-						return left + right.toDecimal();
+						return leftVal + rightVal.toDecimal();
 					}
 				}
 			}
 			case float: {
-				switch(right) {
+				switch(rightVal) {
 					case decimal: {
-						return left + right.toFloat();
+						return leftVal + rightVal.toFloat();
 					}
 					case float: {
-						return left + right;
+						return leftVal + rightVal;
 					}
 					case integer: {
-						return left + right.toFloat();
+						return leftVal + rightVal.toFloat();
 					}
 				}
 			}
 			case integer: {
-				switch(right) {
+				switch(rightVal) {
 					case decimal: {
-						return left.toDecimal() + right;
+						return leftVal.toDecimal() + rightVal;
 					}
 					case float: {
-						return left.toFloat() + right;
+						return leftVal.toFloat() + rightVal;
 					}
 					case integer: {
-						return left + right;
+						return leftVal + rightVal;
 					}
 				}
 			}
 			case string: {
-				switch(right) {
+				switch(rightVal) {
 					case string: {
-						return left + right;
+						return leftVal + rightVal;
 					}
 				}
 			}
 		}
 	}
 	
-	static action minus(any left, any right) returns any {
-		switch(left) {
+	static action minus(action<> returns any left, action<> returns any right) returns any {
+		any leftVal := left();
+		any rightVal := right();
+		switch(leftVal) {
 			case decimal: {
-				switch(right) {
+				switch(rightVal) {
 					case decimal: {
-						return left - right;
+						return leftVal - rightVal;
 					}
 					case float: {
-						return left.toFloat() - right;
+						return leftVal.toFloat() - rightVal;
 					}
 					case integer: {
-						return left - right.toDecimal();
+						return leftVal - rightVal.toDecimal();
 					}
 				}
 			}
 			case float: {
-				switch(right) {
+				switch(rightVal) {
 					case decimal: {
-						return left - right.toFloat();
+						return leftVal - rightVal.toFloat();
 					}
 					case float: {
-						return left - right;
+						return leftVal - rightVal;
 					}
 					case integer: {
-						return left - right.toFloat();
+						return leftVal - rightVal.toFloat();
 					}
 				}
 			}
 			case integer: {
-				switch(right) {
+				switch(rightVal) {
 					case decimal: {
-						return left.toDecimal() - right;
+						return leftVal.toDecimal() - rightVal;
 					}
 					case float: {
-						return left.toFloat() - right;
+						return leftVal.toFloat() - rightVal;
 					}
 					case integer: {
-						return left - right;
+						return leftVal - rightVal;
 					}
 				}
 			}
 		}
 	}
 	
-	static action mod(any left, any right) returns any {
-		switch(left) {
+	static action mod(action<> returns any left, action<> returns any right) returns any {
+		any leftVal := left();
+		any rightVal := right();
+		switch(leftVal) {
 			case decimal: {
-				switch(right) {
+				switch(rightVal) {
 					case decimal: {
-						return OperatorUtils.decimalMod(left, right);
+						return OperatorUtils.decimalMod(leftVal, rightVal);
 					}
 					case float: {
-						return OperatorUtils.floatMod(left.toFloat(), right);
+						return OperatorUtils.floatMod(leftVal.toFloat(), rightVal);
 					}
 					case integer: {
-						return OperatorUtils.decimalMod(left, right.toDecimal());
+						return OperatorUtils.decimalMod(leftVal, rightVal.toDecimal());
 					}
 				}
 			}
 			case float: {
-				switch(right) {
+				switch(rightVal) {
 					case decimal: {
-						return OperatorUtils.floatMod(left, right.toFloat());
+						return OperatorUtils.floatMod(leftVal, rightVal.toFloat());
 					}
 					case float: {
-						return OperatorUtils.floatMod(left, right);
+						return OperatorUtils.floatMod(leftVal, rightVal);
 					}
 					case integer: {
-						return OperatorUtils.floatMod(left, right.toFloat());
+						return OperatorUtils.floatMod(leftVal, rightVal.toFloat());
 					}
 				}
 			}
 			case integer: {
-				switch(right) {
+				switch(rightVal) {
 					case decimal: {
-						return OperatorUtils.decimalMod(left.toDecimal(), right);
+						return OperatorUtils.decimalMod(leftVal.toDecimal(), rightVal);
 					}
 					case float: {
-						return OperatorUtils.floatMod(left.toFloat(), right);
+						return OperatorUtils.floatMod(leftVal.toFloat(), rightVal);
 					}
 					case integer: {
-						return left % right;
+						return leftVal % rightVal;
 					}
 				}
 			}
 		}
 	}
 	
-	static action divide(any left, any right) returns any {
-		switch(left) {
+	static action divide(action<> returns any left, action<> returns any right) returns any {
+		any leftVal := left();
+		any rightVal := right();
+		switch(leftVal) {
 			case decimal: {
-				switch(right) {
+				switch(rightVal) {
 					case decimal: {
-						return left / right;
+						return leftVal / rightVal;
 					}
 					case float: {
-						return left.toFloat() / right;
+						return leftVal.toFloat() / rightVal;
 					}
 					case integer: {
-						return left / right.toDecimal();
+						return leftVal / rightVal.toDecimal();
 					}
 				}
 			}
 			case float: {
-				switch(right) {
+				switch(rightVal) {
 					case decimal: {
-						return left / right.toFloat();
+						return leftVal / rightVal.toFloat();
 					}
 					case float: {
-						return left / right;
+						return leftVal / rightVal;
 					}
 					case integer: {
-						return left / right.toFloat();
+						return leftVal / rightVal.toFloat();
 					}
 				}
 			}
 			case integer: {
-				switch(right) {
+				switch(rightVal) {
 					case decimal: {
-						return left.toDecimal() / right;
+						return leftVal.toDecimal() / rightVal;
 					}
 					case float: {
-						return left.toFloat() / right;
+						return leftVal.toFloat() / rightVal;
 					}
 					case integer: {
-						return left.toFloat() / right.toFloat();
+						return leftVal.toFloat() / rightVal.toFloat();
 					}
 				}
 			}
 		}
 	}
 	
-	static action multiply(any left, any right) returns any {
-		switch(left) {
+	static action multiply(action<> returns any left, action<> returns any right) returns any {
+		any leftVal := left();
+		any rightVal := right();
+		switch(leftVal) {
 			case decimal: {
-				switch(right) {
+				switch(rightVal) {
 					case decimal: {
-						return left * right;
+						return leftVal * rightVal;
 					}
 					case float: {
-						return left.toFloat() * right;
+						return leftVal.toFloat() * rightVal;
 					}
 					case integer: {
-						return left * right.toDecimal();
+						return leftVal * rightVal.toDecimal();
 					}
 				}
 			}
 			case float: {
-				switch(right) {
+				switch(rightVal) {
 					case decimal: {
-						return left * right.toFloat();
+						return leftVal * rightVal.toFloat();
 					}
 					case float: {
-						return left * right;
+						return leftVal * rightVal;
 					}
 					case integer: {
-						return left * right.toFloat();
+						return leftVal * rightVal.toFloat();
 					}
 				}
 			}
 			case integer: {
-				switch(right) {
+				switch(rightVal) {
 					case decimal: {
-						return left.toDecimal() * right;
+						return leftVal.toDecimal() * rightVal;
 					}
 					case float: {
-						return left.toFloat() * right;
+						return leftVal.toFloat() * rightVal;
 					}
 					case integer: {
-						return left * right;
+						return leftVal * rightVal;
 					}
 				}
 			}
 		}
 	}
 	
-	static action notEquals(any left, any right) returns any {
-		return left != right;
+	static action notEquals(action<> returns any left, action<> returns any right) returns any {
+		any leftVal := left();
+		any rightVal := right();
+		switch(leftVal) {
+			case integer: {
+				switch(rightVal) {
+					case integer: {
+						return leftVal != rightVal;
+					}
+					case decimal: {
+						return leftVal.toDecimal() != rightVal;
+					}
+					case float: {
+						return leftVal.toFloat() != rightVal;
+					}
+					default: {
+						return <any>leftVal != rightVal;
+					}
+				}
+			}
+			case decimal: {
+				switch(rightVal) {
+					case integer: {
+						return leftVal != rightVal.toDecimal();
+					}
+					case decimal: {
+						return leftVal != rightVal;
+					}
+					case float: {
+						return not OperatorUtils.decimalEqFloat(leftVal, rightVal);
+					}
+					default: {
+						return <any>leftVal != rightVal;
+					}
+				}
+			}
+			case float: {
+				switch(rightVal) {
+					case integer: {
+						return leftVal != rightVal.toFloat();
+					}
+					case decimal: {
+						return not OperatorUtils.decimalEqFloat(rightVal, leftVal);
+					}
+					case float: {
+						return leftVal != rightVal;
+					}
+					default: {
+						return <any>leftVal != rightVal;
+					}
+				}
+			}
+			default: {
+				return leftVal != rightVal;
+			}
+		}
 	}
 	
-	static action logicalAnd(any left, any right) returns any {
-		switch(left) {
+	static action logicalAnd(action<> returns any left, action<> returns any right) returns any {
+		any leftVal := left();
+		switch(leftVal) {
 			case boolean: {
-				switch(right) {
-					case boolean: {
-						return left and right;
+				if not leftVal {
+					return false;
+				} else {
+					any rightVal := right();
+					switch(rightVal) {
+						case boolean: {
+							return rightVal;
+						}
 					}
 				}
 			}
 			case integer: {
-				switch(right) {
+				any rightVal := right();
+				switch(rightVal) {
 					case integer: {
-						return left and right;
+						return leftVal and rightVal;
 					}
 				}
 			}
 		}
 	}
 	
-	static action logicalOr(any left, any right) returns any {
-		switch(left) {
+	static action logicalOr(action<> returns any left, action<> returns any right) returns any {
+		any leftVal := left();
+		switch(leftVal) {
 			case boolean: {
-				switch(right) {
-					case boolean: {
-						return left or right;
+				if leftVal {
+					return true;
+				} else {
+					any rightVal := right();
+					switch(rightVal) {
+						case boolean: {
+							return rightVal;
+						}
 					}
 				}
 			}
 			case integer: {
-				switch(right) {
+				any rightVal := right();
+				switch(rightVal) {
 					case integer: {
-						return left or right;
+						return leftVal or rightVal;
 					}
 				}
 			}
 		}
 	}
 	
-	static action logicalXor(any left, any right) returns any {
-		switch(left) {
+	static action logicalXor(action<> returns any left, action<> returns any right) returns any {
+		any leftVal := left();
+		any rightVal := right();
+		switch(leftVal) {
 			case boolean: {
-				switch(right) {
+				switch(rightVal) {
 					case boolean: {
-						return left xor right;
+						return leftVal xor rightVal;
 					}
 				}
 			}
 			case integer: {
-				switch(right) {
+				switch(rightVal) {
 					case integer: {
-						return left xor right;
+						return leftVal xor rightVal;
 					}
 				}
 			}
