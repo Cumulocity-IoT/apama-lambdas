@@ -99,4 +99,89 @@ event KnownActions {
 		}
 		return subject().getTypeName();
 	}
+	
+	static action toFloat(action<> returns any subject, sequence<action<> returns any> args) returns any {
+		if args.size() != 0 {
+			throw Exception("action \"toFloat\" must have 0 arguments", "IllegalArgumentException");
+		}
+		switch(subject() as subjectVal) {
+			case integer: {
+				return subjectVal.toFloat();
+			}
+			case float: {
+				return subjectVal;
+			}
+			case decimal: {
+				return subjectVal.toFloat();
+			}
+		}
+	}
+	
+	static action toDecimal(action<> returns any subject, sequence<action<> returns any> args) returns any {
+		if args.size() != 0 {
+			throw Exception("action \"toDecimal\" must have 0 arguments", "IllegalArgumentException");
+		}
+		switch(subject() as subjectVal) {
+			case integer: {
+				return subjectVal.toDecimal();
+			}
+			case float: {
+				return subjectVal.toDecimal();
+			}
+			case decimal: {
+				return subjectVal;
+			}
+		}
+	}
+	
+	static action ceil(action<> returns any subject, sequence<action<> returns any> args) returns any {
+		if args.size() != 0 {
+			throw Exception("action \"ceil\" must have 0 arguments", "IllegalArgumentException");
+		}
+		switch(subject() as subjectVal) {
+			case integer: {
+				return subjectVal;
+			}
+			case float: {
+				return subjectVal.ceil();
+			}
+			case decimal: {
+				return subjectVal.ceil();
+			}
+		}
+	}
+	
+	static action floor(action<> returns any subject, sequence<action<> returns any> args) returns any {
+		if args.size() != 0 {
+			throw Exception("action \"floor\" must have 0 arguments", "IllegalArgumentException");
+		}
+		switch(subject() as subjectVal) {
+			case integer: {
+				return subjectVal;
+			}
+			case float: {
+				return subjectVal.floor();
+			}
+			case decimal: {
+				return subjectVal.floor();
+			}
+		}
+	}
+	
+	static action round(action<> returns any subject, sequence<action<> returns any> args) returns any {
+		if args.size() != 0 {
+			throw Exception("action \"round\" must have 0 arguments", "IllegalArgumentException");
+		}
+		switch(subject() as subjectVal) {
+			case integer: {
+				return subjectVal;
+			}
+			case float: {
+				return subjectVal.round();
+			}
+			case decimal: {
+				return subjectVal.round();
+			}
+		}
+	}
 }

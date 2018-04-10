@@ -23,7 +23,12 @@ event KnownActionHandler {
 			"pow": KnownActions.pow,
 			"sqrt": KnownActions.sqrt,
 			"abs": KnownActions.abs,
-			"getTypeName": KnownActions.getTypeName
+			"getTypeName": KnownActions.getTypeName,
+			"toFloat": KnownActions.toFloat,
+			"toDecimal": KnownActions.toDecimal,
+			"ceil": KnownActions.ceil,
+			"floor": KnownActions.floor,
+			"round": KnownActions.round
 		};
 		
 		return KnownActionHandler(subject, knownActions[actionName], args).callback;
