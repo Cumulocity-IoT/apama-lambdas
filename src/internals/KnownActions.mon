@@ -1,0 +1,102 @@
+package com.industry.lambdas.internals;
+
+using com.apama.exceptions.Exception;
+
+event KnownActions {
+	static action pow(action<> returns any subject, sequence<action<> returns any> args) returns any {
+		if args.size() != 1 {
+			throw Exception("action \"pow\" must have 1 argument", "IllegalArgumentException");
+		}
+		any argVal := args[0](); 
+		any subjectVal := subject();
+		
+		switch (subjectVal) {
+			case integer: {
+				switch(argVal) {
+					case integer: {
+						if argVal > 0 {
+							return subjectVal.pow(argVal);
+						} else {
+							return subjectVal.toFloat().pow(argVal.toFloat());
+						}
+					}
+					case float: {
+						return subjectVal.toFloat().pow(argVal);
+					}
+					case decimal: {
+						return subjectVal.toDecimal().pow(argVal);
+					}
+				}
+			}
+			case float: {
+				switch(argVal) {
+					case integer: {
+						return subjectVal.pow(argVal.toFloat());
+					}
+					case float: {
+						return subjectVal.pow(argVal);
+					}
+					case decimal: {
+						return subjectVal.pow(argVal.toFloat());
+					}
+				}
+			}
+			case decimal: {
+				switch(argVal) {
+					case integer: {
+						return subjectVal.pow(argVal.toDecimal());
+					}
+					case float: {
+						return subjectVal.toFloat().pow(argVal);
+					}
+					case decimal: {
+						return subjectVal.pow(argVal);
+					}
+				}
+			}
+		}
+	}
+	
+	static action sqrt(action<> returns any subject, sequence<action<> returns any> args) returns any {
+		if args.size() != 0 {
+			throw Exception("action \"sqrt\" must have 0 arguments", "IllegalArgumentException");
+		}
+		any subjectVal := subject();
+		switch (subjectVal) {
+			case integer: {
+				return subjectVal.toFloat().sqrt();
+			}
+			case float: {
+				return subjectVal.sqrt();
+			}
+			case decimal: {
+				return subjectVal.sqrt();
+			}
+		}
+	}
+	
+	static action abs(action<> returns any subject, sequence<action<> returns any> args) returns any {
+		if args.size() != 0 {
+			throw Exception("action \"abs\" must have 0 arguments", "IllegalArgumentException");
+		}
+		any subjectVal := subject();
+		switch (subjectVal) {
+			case integer: {
+				return subjectVal.abs();
+			}
+			case float: {
+				return subjectVal.abs();
+			}
+			case decimal: {
+				return subjectVal.abs();
+			}
+		}
+	}
+	
+	static action getTypeName(action<> returns any subject, sequence<action<> returns any> args) returns any {
+		if args.size() != 0 {
+			throw Exception("action \"getTypeName\" must have 0 arguments", "IllegalArgumentException");
+		}
+		return subject().getTypeName();
+	}
+}

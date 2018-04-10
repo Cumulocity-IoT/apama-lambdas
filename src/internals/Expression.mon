@@ -13,6 +13,27 @@ event Undefined {
 	}
 }
 
+event KnownActionHandler {
+	action<> returns any subject;
+	action<action<> returns any, sequence<action<> returns any> > returns any handler;
+	sequence<action<> returns any> args;
+	
+	static action create(action<> returns any subject, string actionName, sequence<action<> returns any> args) returns action<> returns any {		
+		dictionary<string, action<action<> returns any, sequence<action<> returns any> > returns any > knownActions := {
+			"pow": KnownActions.pow,
+			"sqrt": KnownActions.sqrt,
+			"abs": KnownActions.abs,
+			"getTypeName": KnownActions.getTypeName
+		};
+		
+		return KnownActionHandler(subject, knownActions[actionName], args).callback;
+	}
+	
+	action callback() returns any {
+		return handler(subject, args);
+	}
+}
+
 event TernaryHandler {
 	action<> returns any condition;
 	action<> returns any left;
@@ -397,8 +418,34 @@ event ExpressionCompiler {
 						}
 					}
 					if not isEventConstruction {
-						// TODO: implement action calls
-						throw Exception("Can't currently call actions", "NotImplemented");
+						// It must be an action call
+						string fieldAccessAndActionName := firstMatch(beforeBracket, "(\\.|\\$|\\w)+$").getOrThrow();
+						
+						ifpresent firstMatch(fieldAccessAndActionName, "\\.(\\$|\\w)+$") as actionNameAndDot {
+							// We've possibly got a named action call
+							string actionName := actionNameAndDot.substring(".".length(), actionNameAndDot.length());
+							string fieldAccess := fieldAccessAndActionName.substring(0, fieldAccessAndActionName.length() - actionName.length() - ".".length());
+							
+							action<> returns any subject := ExpressionCompiler.create(fieldAccess, closureGetters).compile();
+							
+							sequence<action<> returns any> args := new sequence<action<> returns any>;
+							if not innerExpression.matches("\\s*") {
+								sequence<string> argStrings := ",".split(innerExpression);
+								string arg;
+								for arg in argStrings {
+									args.append(ExpressionCompiler.create(arg, closureGetters).compile());
+								}
+							}
+														
+							string actionPointerName := "$_" + integer.getUnique().toString();
+							closureGetters.add(actionPointerName, KnownActionHandler.create(subject, actionName, args));
+							expression := expression.substring(0, completedBracket.start - fieldAccessAndActionName.length()) + actionPointerName + expression.substring(i + 1, expression.length());
+							i := completedBracket.start + actionPointerName.length() - fieldAccessAndActionName.length() - 1;
+						} else {
+							// We've got an action call (don't know the name of the action)
+							// TODO: In 10.2 we can handle this more generically by calling getGenericAction
+							throw Exception("Can't currently call most actions (.pow(...), .sqrt() etc are ok)", "CompilationException");
+						}
 					}
 				} else {
 					string innerExpression := expression.substring(completedBracket.start + 1, i);
