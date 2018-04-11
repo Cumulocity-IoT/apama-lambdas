@@ -184,4 +184,11 @@ event KnownActions {
 			}
 		}
 	}
+	
+	static action toString_(action<> returns any subject, sequence<action<> returns any> args) returns any {
+		if args.size() != 0 {
+			throw Exception("action \"toString\" must have 0 arguments", "IllegalArgumentException");
+		}
+		return subject().valueToString();
+	}
 }

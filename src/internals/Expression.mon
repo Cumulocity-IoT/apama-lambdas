@@ -28,7 +28,8 @@ event KnownActionHandler {
 			"toDecimal": KnownActions.toDecimal,
 			"ceil": KnownActions.ceil,
 			"floor": KnownActions.floor,
-			"round": KnownActions.round
+			"round": KnownActions.round,
+			"toString": KnownActions.toString_
 		};
 		
 		return KnownActionHandler(subject, knownActions[actionName], args).callback;
