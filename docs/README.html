@@ -1,0 +1,206 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lambdas</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__left">
+    <div class="stackedit__toc">
+      
+<ul>
+<li><a href="#lambdas">Lambdas</a>
+<ul>
+<li><a href="#contents">Contents</a></li>
+<li><a href="#a-idinstallainstallation">Installation</a></li>
+<li><a href="#a-idintroaintroduction-to-lambdas">Introduction to Lambdas</a></li>
+<li><a href="#a-idusageawhen-to-use-lambdas">When to Use Lambdas?</a></li>
+<li><a href="#a-idlambda-typesadifferent-type-of-lambdas">Different Type of Lambdas</a></li>
+<li><a href="#a-idlanguagealanguage-features">Language Features</a></li>
+</ul>
+</li>
+</ul>
+
+    </div>
+  </div>
+  <div class="stackedit__right">
+    <div class="stackedit__html">
+      <h1 id="lambdas">Lambdas</h1>
+<h2 id="contents">Contents</h2>
+<ul>
+<li><a href="#install">Installation</a></li>
+<li><a href="#intro">Introduction to Lambdas</a></li>
+<li><a href="#usage">When to Use Lambdas?</a></li>
+<li><a href="#lambda-types">Different Types of Lambdas</a></li>
+<li><a href="#language">Language Features</a></li>
+</ul>
+<h2 id="a-idinstallainstallation"><a id="install"></a>Installation</h2>
+<h3 id="installing-files">1. Installing files</h3>
+<p>Copy the folders contained inside <code>CopyContentsToApamaInstallDir</code> into the Apama install directory (Usually <code>C:\SoftwareAG\Apama</code> on Windows or <code>/opt/softwareag/apama</code> on Unix), merging them with what is already there.</p>
+<h3 id="adding-to-designer">2. Adding to Designer</h3>
+<ol>
+<li>From designer right click on your project in <code>Project Explorer</code></li>
+<li>Select <code>Apama</code> from the drop down menu;</li>
+<li>Select <code>Add Bundle</code></li>
+<li>Scroll down to <code>Standard bundles</code> and select <code>Lambdas</code></li>
+<li>Click <code>Ok</code></li>
+</ol>
+<h2 id="a-idintroaintroduction-to-lambdas"><a id="intro"></a>Introduction to Lambdas</h2>
+<p>Lambdas in EPL are closely based on Arrow Functions in JavaScript. They are inline actions that manipulate one or more provided values, implicitly returning the result.</p>
+<pre class=" language-javascript"><code class="prism  language-javascript">action<span class="token operator">&lt;</span>any<span class="token operator">&gt;</span> returns any multiplyBy10<span class="token punctuation">:</span><span class="token operator">=</span> Lambda<span class="token punctuation">.</span><span class="token function">function1</span><span class="token punctuation">(</span><span class="token string">"x =&gt; x * 10"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token function">multiplyBy10</span><span class="token punctuation">(</span><span class="token number">1.5</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token operator">&lt;</span>any<span class="token operator">&gt;</span> <span class="token number">15.0</span><span class="token punctuation">;</span>
+</code></pre>
+<h2 id="a-idusageawhen-to-use-lambdas"><a id="usage"></a>When to Use Lambdas?</h2>
+<p>Ever find yourself writing this:</p>
+<pre class=" language-javascript"><code class="prism  language-javascript"><span class="token function">aFunctionThatTakesACallback</span><span class="token punctuation">(</span>callback<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token operator">...</span> 
+<span class="token comment">// Much further down</span>
+<span class="token operator">...</span>
+action <span class="token function">callback</span><span class="token punctuation">(</span>float arg1<span class="token punctuation">,</span> float arg2<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	<span class="token comment">// A simple callback</span>
+	<span class="token keyword">return</span> arg1 <span class="token operator">+</span> arg2 <span class="token operator">+</span> <span class="token number">30.0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>You can simplify the code by doing this:</p>
+<pre class=" language-javascript"><code class="prism  language-javascript"><span class="token function">aFunctionThatTakesACallback</span><span class="token punctuation">(</span>Lambda<span class="token punctuation">.</span><span class="token function">function2</span><span class="token punctuation">(</span><span class="token string">"arg1, arg2 =&gt; arg1 + arg2 + 30"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>This is particularly useful when used with functional programming</p>
+<pre class=" language-javascript"><code class="prism  language-javascript">Observable<span class="token punctuation">.</span><span class="token function">fromValues</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span><span class="token number">2</span><span class="token punctuation">,</span><span class="token number">3</span><span class="token punctuation">,</span><span class="token number">4</span><span class="token punctuation">,</span><span class="token number">5</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+	<span class="token punctuation">.</span><span class="token function">filter</span><span class="token punctuation">(</span>Lambda<span class="token punctuation">.</span><span class="token function">predicate</span><span class="token punctuation">(</span><span class="token string">"x =&gt; x % 2 = 0"</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+	<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span>Lambda<span class="token punctuation">.</span><span class="token function">function1</span><span class="token punctuation">(</span><span class="token string">"x =&gt; x * 30"</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+	<span class="token punctuation">.</span><span class="token function">reduce</span><span class="token punctuation">(</span>Lamda<span class="token punctuation">.</span><span class="token function">function2</span><span class="token punctuation">(</span><span class="token string">"sum, x =&gt; sum + x"</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+	<span class="token punctuation">.</span><span class="token function">subscribe</span><span class="token punctuation">(</span>Subscriber<span class="token punctuation">.</span><span class="token function">create</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">onNext</span><span class="token punctuation">(</span>printValue<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<h2 id="a-idlambda-typesadifferent-type-of-lambdas"><a id="lambda-types"></a>Different Type of Lambdas</h2>
+<p><strong>Functions</strong> - Take a varying number of arguments and return a value</p>
+<pre class=" language-javascript"><code class="prism  language-javascript">action<span class="token operator">&lt;</span><span class="token operator">&gt;</span> returns any ex0 <span class="token punctuation">:</span><span class="token operator">=</span> Lambda<span class="token punctuation">.</span><span class="token function">function0</span><span class="token punctuation">(</span><span class="token string">"10 + 5 / 2 + ' = 12.5'"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+action<span class="token operator">&lt;</span>any<span class="token operator">&gt;</span> returns any ex1 <span class="token punctuation">:</span><span class="token operator">=</span> Lambda<span class="token punctuation">.</span><span class="token function">function1</span><span class="token punctuation">(</span><span class="token string">"x =&gt; x * 10"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+action<span class="token operator">&lt;</span>any<span class="token punctuation">,</span> any<span class="token operator">&gt;</span> returns any ex2 <span class="token punctuation">:</span><span class="token operator">=</span> Lambda<span class="token punctuation">.</span><span class="token function">function2</span><span class="token punctuation">(</span><span class="token string">"x, y =&gt; x + y"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+action<span class="token operator">&lt;</span>sequence<span class="token operator">&lt;</span>any<span class="token operator">&gt;</span> <span class="token operator">&gt;</span> returns any ex3 <span class="token punctuation">:</span><span class="token operator">=</span> Lambda<span class="token punctuation">.</span><span class="token keyword">function</span><span class="token punctuation">(</span><span class="token string">"x, y, z =&gt; x + y / z"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p><strong>Predicate</strong> - Take a single argument and returns a boolean</p>
+<pre class=" language-javascript"><code class="prism  language-javascript">action<span class="token operator">&lt;</span>any<span class="token operator">&gt;</span> returns boolean ex <span class="token punctuation">:</span><span class="token operator">=</span> Lambda<span class="token punctuation">.</span><span class="token function">predicate</span><span class="token punctuation">(</span><span class="token string">"x =&gt; x &gt;= 10 and x &lt; 20"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p><strong>Call (Awaiting Apama 10.2)</strong> - Run a lambda just for side-effects (Not yet possible)</p>
+<pre class=" language-javascript"><code class="prism  language-javascript">action<span class="token operator">&lt;</span>any<span class="token operator">&gt;</span> returns boolean ex <span class="token punctuation">:</span><span class="token operator">=</span> Lambda<span class="token punctuation">.</span><span class="token function">call</span><span class="token punctuation">(</span><span class="token string">"x =&gt; x.doSomething(10 + 3)"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<h2 id="a-idlanguagealanguage-features"><a id="language"></a>Language Features</h2>
+<p>Lambdas attempt to provide a language very close to EPL but without the need for casting. You will never have to write  <code>&lt;sequence&lt;float, boolean&gt; &gt;</code> within a lambda!</p>
+<p><strong>Numbers</strong><br>
+All numbers are treated the same and can be operated on without conversion.</p>
+<pre class=" language-javascript"><code class="prism  language-javascript">Lambda<span class="token punctuation">.</span><span class="token function">function1</span><span class="token punctuation">(</span><span class="token string">"x =&gt; x + 10 + 11.1 + 22.2d"</span><span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token number">1.1</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token operator">&lt;</span>any<span class="token operator">&gt;</span> <span class="token number">44.4</span>
+</code></pre>
+<p>This follows the rules of <a href="#coercion">coercion</a>.</p>
+<p><strong>Strings</strong><br>
+Strings can be defined with either <code>\"</code> or <code>'</code>. Generally <code>'</code> is easier because there is no need for the backslash escape character.</p>
+<pre class=" language-javascript"><code class="prism  language-javascript">Lambda<span class="token punctuation">.</span><span class="token function">function1</span><span class="token punctuation">(</span><span class="token string">"x =&gt; \"hello\" + 'world'"</span><span class="token punctuation">)</span>
+</code></pre>
+<p><strong>Brackets</strong><br>
+The usual bracketing syntax applies</p>
+<pre class=" language-javascript"><code class="prism  language-javascript">Lambda<span class="token punctuation">.</span><span class="token function">function1</span><span class="token punctuation">(</span><span class="token string">"x =&gt; (x + 5) / 12"</span><span class="token punctuation">)</span>
+</code></pre>
+<p><strong>Numeric Operators</strong><br>
+All of the usual epl operators (<code>%</code>, <code>/</code>, <code>*</code>, <code>-</code>, <code>+</code>).<br>
+<em>Note: Type <a href="#coercion">coercion</a> may happen.</em></p>
+<p><strong>Logical Operators</strong><br>
+All of the usual epl operators (<code>=</code>, <code>!=</code>, <code>&gt;=</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&lt;</code>, <code>and</code>, <code>xor</code>, <code>or</code>,<code>not</code>).<br>
+<em>Note: Type <a href="#coercion">coercion</a> may happen.</em></p>
+<p>Some non-epl operators:<br>
+<code>!</code> - Same as <code>not</code></p>
+<p><strong>Ternary Operator</strong></p>
+<pre class=" language-javascript"><code class="prism  language-javascript">Lambda<span class="token punctuation">.</span><span class="token function">function1</span><span class="token punctuation">(</span><span class="token string">"x =&gt; x &gt; 10 ? 'Big' : 'Small'"</span><span class="token punctuation">)</span>
+</code></pre>
+<p><strong>Field, Dictionary, and Sequence Access</strong></p>
+<pre class=" language-javascript"><code class="prism  language-javascript">Lambda<span class="token punctuation">.</span><span class="token function">function1</span><span class="token punctuation">(</span><span class="token string">"event0 =&gt; event0.fieldName"</span><span class="token punctuation">)</span>
+<span class="token comment">// or</span>
+Lambda<span class="token punctuation">.</span><span class="token function">function1</span><span class="token punctuation">(</span><span class="token string">"event0 =&gt; event0['fieldName']"</span><span class="token punctuation">)</span>
+</code></pre>
+<pre class=" language-javascript"><code class="prism  language-javascript">Lambda<span class="token punctuation">.</span><span class="token function">function1</span><span class="token punctuation">(</span><span class="token string">"dict =&gt; dict[key]"</span><span class="token punctuation">)</span>
+<span class="token comment">// or (If the dictionary has string keys)</span>
+Lambda<span class="token punctuation">.</span><span class="token function">function1</span><span class="token punctuation">(</span><span class="token string">"dict =&gt; dict.key"</span><span class="token punctuation">)</span>
+</code></pre>
+<pre class=" language-javascript"><code class="prism  language-javascript">Lambda<span class="token punctuation">.</span><span class="token function">function1</span><span class="token punctuation">(</span><span class="token string">"seq0 =&gt; seq0[0]"</span><span class="token punctuation">)</span>
+</code></pre>
+<p><strong>Special Values</strong><br>
+<code>currentTime</code> - The same as in EPL - Gets the current time in seconds (usually rounded to nearest 100ms)</p>
+<p><strong>Action Calling</strong><br>
+Calling actions in a generic way is not possible in Apama 10.1, so only a handful of particularly useful actions are supported. This will improve in 10.2.</p>
+
+<table>
+<thead>
+<tr>
+<th align="right">Action</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="right"><code>.toFloat()</code></td>
+<td>Call on any numeric type to convert to float</td>
+</tr>
+<tr>
+<td align="right"><code>.toDecimal()</code></td>
+<td>Call on any numeric type to convert to decimal</td>
+</tr>
+<tr>
+<td align="right"><code>.round()</code></td>
+<td>Call on any numeric type to round to an integer</td>
+</tr>
+<tr>
+<td align="right"><code>.ceil()</code></td>
+<td>Call on any numeric type to round upwards to an integer</td>
+</tr>
+<tr>
+<td align="right"><code>.floor()</code></td>
+<td>Call on any numeric type to round downwards to an integer</td>
+</tr>
+<tr>
+<td align="right"><code>.abs()</code></td>
+<td>Call on any numeric type to provide the non-negative value</td>
+</tr>
+<tr>
+<td align="right"><code>.pow(n)</code></td>
+<td>Call on any numeric type to raise it to the <code>n</code><sup>th</sup> power</td>
+</tr>
+<tr>
+<td align="right"><code>.sqrt()</code></td>
+<td>Call on any numeric type to square root the value</td>
+</tr>
+<tr>
+<td align="right"><code>.toString()</code></td>
+<td>Call on any type to convert it to a string (has no effect on strings)</td>
+</tr>
+</tbody>
+</table><p><strong>Sequence Literals</strong><br>
+Sequences can be constructed in lambdas in much the same way that they can in EPL, except that they are always <code>sequence&lt;any&gt;</code>.</p>
+<pre class=" language-javascript"><code class="prism  language-javascript">Lambda<span class="token punctuation">.</span><span class="token function">function1</span><span class="token punctuation">(</span><span class="token string">"x =&gt; [x, x + 1, x + 2]"</span><span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token operator">&lt;</span>any<span class="token operator">&gt;</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">]</span>
+</code></pre>
+<p><strong>Spread Operator</strong></p>
+<pre class=" language-javascript"><code class="prism  language-javascript">Lambda<span class="token punctuation">.</span><span class="token function">function1</span><span class="token punctuation">(</span>"x <span class="token operator">=&gt;</span> <span class="token punctuation">[</span><span class="token operator">...</span>x<span class="token punctuation">,</span> <span class="token operator">...</span>x<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token operator">&lt;</span>any<span class="token operator">&gt;</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">]</span>
+</code></pre>
+<p><strong>Array Destructuring</strong><br>
+When using lambdas (particularly with Observables) you may find that a lambda is provided with a sequence as the argument. Rather than accessing each value using <code>seq[index]</code> it is easier to assign a name to each item in the sequence:</p>
+<pre class=" language-javascript"><code class="prism  language-javascript">Lambda<span class="token punctuation">.</span><span class="token function">function1</span><span class="token punctuation">(</span><span class="token string">"[sum, count] =&gt; sum / count"</span><span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">56</span><span class="token punctuation">,</span> <span class="token number">7</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token operator">&lt;</span>any<span class="token operator">&gt;</span> <span class="token number">8.0</span>
+</code></pre>
+<p><a id="coercion"></a><strong>Type Coercion</strong><br>
+Numbers and sometimes values are coerced to sensible types, using the following rules:</p>
+<ul>
+<li>Operations on two values of the same type <em>mostly</em> result in the same type</li>
+<li>Operations on <code>integers</code> which may result in fractions result in <code>floats</code></li>
+<li>Operations involving <code>integer</code> and <code>decimal</code> result in <code>decimal</code></li>
+<li>Operations involving <code>integer</code> and <code>float</code> result in <code>float</code></li>
+<li>Operations involving <code>float</code> and <code>decimal</code> result in <code>float</code></li>
+<li>Operations on any type and <code>string</code> will call <code>.valueToString</code> on the any type</li>
+</ul>
+<p>If you need the result to be a particular type (and that isn’t possible through explicit typing eg. <code>22.0d</code>) then use the <code>.toFloat()</code>, <code>.toDecimal()</code>, <code>.round()</code>, <code>ceil()</code>, <code>.floor()</code>, <code>.toString()</code> actions.</p>
+
+    </div>
+  </div>
+</body>
+
+</html>

@@ -2,6 +2,7 @@
 ## Contents
 * [Installation](#install)
 * [Introduction to Lambdas](#intro) 
+* [When to Use Lambdas?](#usage)
 * [Different Types of Lambdas](#lambda-types) 
 * [Language Features](#language) 
 
@@ -16,11 +17,35 @@ Copy the folders contained inside `CopyContentsToApamaInstallDir` into the Apama
 5. Click `Ok`
 
 ## <a id="intro"></a>Introduction to Lambdas
-Lambdas in EPL are closely based on Arrow Functions in JavaScript. They are inline actions that manipulate one or more provided values, usually returning the result.
+Lambdas in EPL are closely based on Arrow Functions in JavaScript. They are inline actions that manipulate one or more provided values, implicitly returning the result.
 ```javascript
 action<any> returns any multiplyBy10:= Lambda.function1("x => x * 10");
 
 multiplyBy10(1.5) = <any> 15.0;
+```
+## <a id="usage"></a>When to Use Lambdas?
+Ever find yourself writing this:
+```javascript
+aFunctionThatTakesACallback(callback);
+... 
+// Much further down
+...
+action callback(float arg1, float arg2) {
+	// A simple callback
+	return arg1 + arg2 + 30.0;
+}
+```
+You can simplify the code by doing this:
+```javascript
+aFunctionThatTakesACallback(Lambda.function2("arg1, arg2 => arg1 + arg2 + 30"));
+```
+This is particularly useful when used with functional programming
+```javascript
+Observable.fromValues([1,2,3,4,5])
+	.filter(Lambda.predicate("x => x % 2 = 0"))
+	.map(Lambda.function1("x => x * 30"))
+	.reduce(Lamda.function2("sum, x => sum + x"))
+	.subscribe(Subscriber.create().onNext(printValue));
 ```
 
 ## <a id="lambda-types"></a>Different Type of Lambdas
@@ -62,11 +87,11 @@ Lambda.function1("x => (x + 5) / 12")
 ```
 
 **Numeric Operators**
-All of the usual epl operators (`%`, `/`, `*`, `-`, `+`)
+All of the usual epl operators (`%`, `/`, `*`, `-`, `+`).
 _Note: Type [coercion](#coercion) may happen._
 
 **Logical Operators**
-All of the usual epl operators (`=`, `!=`, `>=`, `>`, `<=`, `<`, `and`, `xor`, `or`,`not`)
+All of the usual epl operators (`=`, `!=`, `>=`, `>`, `<=`, `<`, `and`, `xor`, `or`,`not`). 
 _Note: Type [coercion](#coercion) may happen._
 
 Some non-epl operators:
@@ -79,20 +104,20 @@ Lambda.function1("x => x > 10 ? 'Big' : 'Small'")
 
 **Field, Dictionary, and Sequence Access**
 ```javascript
-Lambda.function1("dict => dict[key]")
-// or (If the dictionary has string keys)
-Lambda.function1("dict => dict.key")
-```
-```javascript
 Lambda.function1("event0 => event0.fieldName")
 // or
 Lambda.function1("event0 => event0['fieldName']")
 ```
 ```javascript
+Lambda.function1("dict => dict[key]")
+// or (If the dictionary has string keys)
+Lambda.function1("dict => dict.key")
+```
+```javascript
 Lambda.function1("seq0 => seq0[0]")
 ```
 **Special Values**
-`currentTime` - The current time in seconds (usually rounded to nearest 100ms) 
+`currentTime` - The same as in EPL - Gets the current time in seconds (usually rounded to nearest 100ms) 
 
 **Action Calling**
 Calling actions in a generic way is not possible in Apama 10.1, so only a handful of particularly useful actions are supported. This will improve in 10.2.

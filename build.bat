@@ -18,6 +18,8 @@ call ".\clean.bat"
 
 md "%~dp0output\CopyContentsToApamaInstallDir\monitors\Lambda"
 engine_deploy --outputCDP "%~dp0output\CopyContentsToApamaInstallDir\monitors\Lambda\Lambda.cdp" src
+md "%~dp0output\docs"
+xcopy /S "%~dp0docs" "%~dp0output\docs"
 md "%~dp0output\CopyContentsToApamaInstallDir\catalogs\bundles"
 xcopy /S "%~dp0bundles" "%~dp0output\CopyContentsToApamaInstallDir\catalogs\bundles"
 
