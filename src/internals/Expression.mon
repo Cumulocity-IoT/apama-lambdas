@@ -240,6 +240,7 @@ event ExpressionCompiler {
 	}
 	
 	action compile() returns action<> returns any {
+		expression := expression.ltrim().rtrim();
 		literalsToPointers();
 		squareBracketsToActions();
 		bracketsToActions();
@@ -277,8 +278,9 @@ event ExpressionCompiler {
 					i := i + lengthOfVar;
 					continue;
 				}
-			} else if currentCharacter.matches("\\d") { // Check for numeric values
-				integer lengthOfValue := remainingString.search("\\d+(\\.\\d*d?)?")[0].length();
+			// Check for numeric values
+			} else if currentCharacter.matches("\\d") {
+				integer lengthOfValue := remainingString.search("\\d+(\\.\\d+d?)?")[0].length();
 				string valueString := remainingString.substring(0, lengthOfValue);
 				string substitutionName := "$_" + integer.getUnique().toString();
 				if valueString.find("d") != -1 {
@@ -308,6 +310,10 @@ event ExpressionCompiler {
 					throw Exception("String value not closed, no matching: " + quoteType, "CompilationException");
 				}
 				string valueString := remainingString.substring(1, lengthOfString-1);
+				if quoteType = "'" {
+					valueString := valueString.replaceAll("\"", "\\\"");
+					valueString := valueString.replaceAll("\\'", "'");
+				}
 				string substitutionName := "$_" + integer.getUnique().toString();
 				closureGetters.add(substitutionName, ValueGetter.create(string.parse("\"" + valueString + "\"")));
 				expression := expression.substring(0, i) + substitutionName + expression.substring(i + lengthOfString, expression.length());

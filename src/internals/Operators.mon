@@ -271,53 +271,53 @@ event Operators {
 			case integer: {
 				switch(rightVal) {
 					case integer: {
-						return leftVal > rightVal;
+						return leftVal >= rightVal;
 					}
 					case decimal: {
-						return leftVal.toDecimal() > rightVal;
+						return leftVal.toDecimal() >= rightVal;
 					}
 					case float: {
-						return leftVal.toFloat() > rightVal;
+						return leftVal.toFloat() >= rightVal;
 					}
 					default: {
-						return <any>leftVal > rightVal;
+						return <any>leftVal >= rightVal;
 					}
 				}
 			}
 			case decimal: {
 				switch(rightVal) {
 					case integer: {
-						return leftVal > rightVal.toDecimal();
+						return leftVal >= rightVal.toDecimal();
 					}
 					case decimal: {
-						return leftVal > rightVal;
+						return leftVal >= rightVal;
 					}
 					case float: {
 						return leftVal.toFloat() > rightVal or OperatorUtils.decimalEqFloat(leftVal, rightVal);
 					}
 					default: {
-						return <any>leftVal > rightVal;
+						return <any>leftVal >= rightVal;
 					}
 				}
 			}
 			case float: {
 				switch(rightVal) {
 					case integer: {
-						return leftVal > rightVal.toFloat();
+						return leftVal >= rightVal.toFloat();
 					}
 					case decimal: {
 						return leftVal > rightVal.toFloat() or OperatorUtils.decimalEqFloat(rightVal, leftVal);
 					}
 					case float: {
-						return leftVal > rightVal;
+						return leftVal >= rightVal;
 					}
 					default: {
-						return <any>leftVal > rightVal;
+						return <any>leftVal >= rightVal;
 					}
 				}
 			}
 			default: {
-				return leftVal > rightVal;
+				return leftVal >= rightVal;
 			}
 		}
 	}
@@ -329,53 +329,53 @@ event Operators {
 			case integer: {
 				switch(rightVal) {
 					case integer: {
-						return leftVal < rightVal;
+						return leftVal <= rightVal;
 					}
 					case decimal: {
-						return leftVal.toDecimal() < rightVal;
+						return leftVal.toDecimal() <= rightVal;
 					}
 					case float: {
-						return leftVal.toFloat() < rightVal;
+						return leftVal.toFloat() <= rightVal;
 					}
 					default: {
-						return <any>leftVal < rightVal;
+						return <any>leftVal <= rightVal;
 					}
 				}
 			}
 			case decimal: {
 				switch(rightVal) {
 					case integer: {
-						return leftVal < rightVal.toDecimal();
+						return leftVal <= rightVal.toDecimal();
 					}
 					case decimal: {
-						return leftVal < rightVal;
+						return leftVal <= rightVal;
 					}
 					case float: {
 						return leftVal.toFloat() < rightVal or OperatorUtils.decimalEqFloat(leftVal, rightVal);
 					}
 					default: {
-						return <any>leftVal < rightVal;
+						return <any>leftVal <= rightVal;
 					}
 				}
 			}
 			case float: {
 				switch(rightVal) {
 					case integer: {
-						return leftVal < rightVal.toFloat();
+						return leftVal <= rightVal.toFloat();
 					}
 					case decimal: {
 						return leftVal < rightVal.toFloat() or OperatorUtils.decimalEqFloat(rightVal, leftVal);
 					}
 					case float: {
-						return leftVal < rightVal;
+						return leftVal <= rightVal;
 					}
 					default: {
-						return <any>leftVal < rightVal;
+						return <any>leftVal <= rightVal;
 					}
 				}
 			}
 			default: {
-				return leftVal < rightVal;
+				return leftVal <= rightVal;
 			}
 		}
 	}
@@ -395,6 +395,9 @@ event Operators {
 					case integer: {
 						return leftVal + rightVal.toDecimal();
 					}
+					default: {
+						return leftVal.toString() + rightVal.valueToString();
+					}
 				}
 			}
 			case float: {
@@ -407,6 +410,9 @@ event Operators {
 					}
 					case integer: {
 						return leftVal + rightVal.toFloat();
+					}
+					default: {
+						return leftVal.toString() + rightVal.valueToString();
 					}
 				}
 			}
@@ -421,14 +427,13 @@ event Operators {
 					case integer: {
 						return leftVal + rightVal;
 					}
-				}
-			}
-			case string: {
-				switch(rightVal) {
-					case string: {
-						return leftVal + rightVal;
+					default: {
+						return leftVal.toString() + rightVal.valueToString();
 					}
 				}
+			}
+			default: {
+				return leftVal.valueToString() + rightVal.valueToString();
 			}
 		}
 	}
