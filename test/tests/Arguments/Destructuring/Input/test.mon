@@ -1,0 +1,13 @@
+using utils.TestRunner;
+
+monitor Test {  
+	action onload() {
+		TestRunner.create()
+			.addTest("[x, y] => x + y", [<any>[1,2]], 3, "Simple destructuring")
+			.addTest("[x, y], [i,j] => x + y + i + j", [<any>[1,2],[3,4]], 10, "Multiple destructuring")
+			.addTest("[x, y] => x", [<any>[1]], 1, "Destructuring missing")
+			.addTest("[x] => x", [<any>[1,2]], 1, "Destructuring partial")
+			
+			.run();
+	}  
+}

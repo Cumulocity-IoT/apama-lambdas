@@ -1,0 +1,12 @@
+package my.pkg.name;
+
+using utils.TestRunner;
+
+monitor Test {  
+	action onload() {
+		TestRunner.create()
+			.addTest("currentTime", new sequence<any>, currentTime, "currentTime")
+
+			.run();
+	}  
+}

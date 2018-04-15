@@ -1,0 +1,19 @@
+package my.pkg.name;
+
+using utils.TestRunner;
+
+event TestEvent {
+	integer x;
+	float y;
+	decimal z;
+	string s;
+}
+
+monitor Test {  
+	action onload() {
+		TestRunner.create()
+			.addTest("my.pkg.name.TestEvent(10,10,10,10)", new sequence<any>, TestEvent(10,10.0,10.0d,"10"), "construction with type coercion")
+
+			.run();
+	}  
+}

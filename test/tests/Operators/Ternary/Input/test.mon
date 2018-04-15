@@ -1,0 +1,13 @@
+using utils.TestRunner;
+
+monitor Test {  
+	action onload() {
+		TestRunner.create()
+			.addTest("true ? 'Yes' : 'No'", new sequence<any>, "Yes", "Positive")
+			.addTest("false ? 'Yes' : 'No'", new sequence<any>, "No", "Negative")
+			.addTest("true ? true ? 'Yes' : 'No' : 'No'", new sequence<any>, "Yes", "Multiple Positive")
+			.addTest("false ? 'Yes' : true ? 'No' : 'Error'", new sequence<any>, "No", "Multiple Negative")
+		
+			.run();
+	}  
+}

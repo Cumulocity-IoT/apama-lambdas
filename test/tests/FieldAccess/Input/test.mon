@@ -1,0 +1,19 @@
+using utils.TestRunner;
+
+event Input {
+	any value;
+}
+
+monitor Test {  
+	action onload() {
+		TestRunner.create()
+			.addTest("x => x.value", [<any> Input(1)], 1, "Event field Access")
+			.addTest("x => x['value']", [<any> Input(1)], 1, "Event field Access via string")
+
+			.addTest("x => x.value", [<any> {"value":1}], 1, "Dictionary string key field access")
+			.addTest("x => x[1234]", [<any> {1234:1}], 1, "Dictionary integer key field access")
+
+			.addTest("x => x[1]", [<any>[1,2,3]], 2, "Sequence value access")
+			.run();
+	}  
+}

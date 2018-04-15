@@ -1,0 +1,76 @@
+package utils;
+
+using com.apama.exceptions.Exception;
+
+using com.industry.lambdas.Lambda;
+
+event TestFailed {
+  string message;
+}
+event TestComplete {}
+
+event Test {
+  string name;
+
+  action complete() {
+    send TestComplete() to name;
+  }
+  
+  action fail(string message) {
+    send TestFailed(message) to name;
+  }
+}
+
+event TestCase {
+	string lambda;
+	sequence<any> args;
+	any expectedResult;
+	string description;
+}
+
+event TestRunner {
+	sequence<TestCase> testCases;
+	
+	static action create() returns TestRunner {
+		return new TestRunner;
+	}
+	
+	action addTest(string lambda, sequence<any> args, any expectedResult, string description) returns TestRunner {
+		testCases.append(TestCase(lambda, args, expectedResult, description));
+		return self;
+	}
+	
+	action run() {
+		TestCase test;
+		for test in testCases {
+			try {
+				any result := Lambda.function(test.lambda)(test.args);
+				if not equals(result, test.expectedResult) {
+					Test("TestResult").fail("Test: " + test.description + "\nUnexpected Result: " + result.toString() + " Should have been: " + test.expectedResult.toString());
+				}
+			} catch (Exception e) {
+				Test("TestResult").fail("Test: " + test.description + "\n" + e.toStringWithStackTrace());
+			}
+		}
+		Test("TestResult").complete();
+	}
+	
+	action equals(any left, any right) returns boolean {
+		switch (left) {
+			case float: {
+				switch (right) {
+					case float: {
+						float delta := (left - right);
+						return delta <= (left - left.nextafter(-float.INFINITY));
+					}
+					default: {
+						return false;
+					}
+				}
+			}
+			default: {
+				return left = right;
+			}
+		}
+	}
+}

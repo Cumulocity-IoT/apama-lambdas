@@ -1,0 +1,12 @@
+using utils.TestRunner;
+
+monitor Test {  
+	action onload() {
+		TestRunner.create()
+			.addTest("10", new sequence<any>, 10, "Integer")
+			.addTest("10.1234", new sequence<any>, 10.1234, "Float")
+			.addTest("10.1234d", new sequence<any>, 10.1234d, "Decimal")
+			
+			.run();
+	}  
+}

@@ -1,0 +1,45 @@
+using utils.TestRunner;
+
+monitor Test {  
+	action onload() {
+		TestRunner.create()
+			.addTest("10 + 11", new sequence<any>, 21, "Integer addition")
+			.addTest("10.0 + 11.0", new sequence<any>, 21.0, "Float addition")
+			.addTest("10.0d + 11.0d", new sequence<any>, 21.0d, "Decimal addition")
+			.addTest("1 + 2.5 + 3.5d + 4 + 5.5 + 5.5d", new sequence<any>, 22.0, "Various numeric type addition")
+
+			.addTest("'Hello' + 'World'", new sequence<any>, "HelloWorld", "String addition")
+			.addTest("1 + ' integer'", new sequence<any>, "1 integer", "integer, string addition")
+			.addTest("1.0 + ' float'", new sequence<any>, "1 float", "float, string addition")
+			.addTest("1.0d + ' decimal'", new sequence<any>, "1 decimal", "decimal, string addition")
+
+			.addTest("-10", new sequence<any>, -10, "Unary Subtract integer")
+			.addTest("-10.0", new sequence<any>, -10.0, "Unary Subtract Float")
+			.addTest("-10.0d", new sequence<any>, -10.0d, "Unary Subtract Decimal")
+			.addTest("-(-10)", new sequence<any>, 10, "Unary Subtract Multiple")
+		
+			.addTest("10 - 11", new sequence<any>, -1, "Integer subtraction")
+			.addTest("10.0 - 11.0", new sequence<any>, -1.0, "Float subtraction")
+			.addTest("10.0d - 11.0d", new sequence<any>, -1.0d, "Decimal subtraction")
+			.addTest("-1 - 2.5 - 3.5d - 4 - 5.5 - 5.5d", new sequence<any>, -22.0, "Various numeric type subtraction")
+		
+			.addTest("10 * 11", new sequence<any>, 110, "Integer multiplication")
+			.addTest("10.0 * 11.0", new sequence<any>, 110.0, "Float multiplication")
+			.addTest("10.0d * 11.0d", new sequence<any>, 110.0d, "Decimal multiplication")
+			.addTest("2 * 2.5 * 3.5d * 4 * 5.5 * 5.5d", new sequence<any>, 2.0 * 2.5 * 3.5 * 4.0 * 5.5 * 5.5, "Various numeric type multiplication")
+			
+			.addTest("10 / 2", new sequence<any>, 5.0, "Integer division") // Special case - integer division results in float because it's usually fractional
+			.addTest("10.0 / 2.0", new sequence<any>, 5.0, "Float division")
+			.addTest("10.0d / 2.0d", new sequence<any>, 5.0d, "Decimal division")
+			.addTest("100 / 2.5 / 6.4d / 5 / 5 / 0.25d", new sequence<any>, 1.0, "Various numeric type division")
+		
+			.addTest("10 % 3", new sequence<any>, 1, "Integer mod")
+			.addTest("10.4 % 3.5", new sequence<any>, 3.4, "Float mod") // 3.4 ish
+			.addTest("10.4d % 3.5d", new sequence<any>, 3.4d, "Decimal mod")
+			.addTest("100 % 34.0 % 16.5d % 8 % 4.0 % 3.5d", new sequence<any>, 0.0, "Various numeric type mod")
+		
+			.addTest("1 + 5 - 2 * 64 / 100 % 34", new sequence<any>, 2.0, "Operator Precedence")
+		
+			.run();
+	}  
+}

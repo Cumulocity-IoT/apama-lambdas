@@ -1,0 +1,15 @@
+using utils.TestRunner;
+
+monitor Test {  
+	action onload() {
+		TestRunner.create()
+			.addTest("\"HelloWorld\"", new sequence<any>, "HelloWorld", "double quotes")
+			.addTest("'HelloWorld'", new sequence<any>, "HelloWorld", "single quotes")
+			.addTest("'\"Some escaped quotes\"'", new sequence<any>, "\"Some escaped quotes\"", "double quotes inside single quotes")
+			.addTest("\"'A string'\"", new sequence<any>, "'A string'", "single quotes inside double quotes")
+			.addTest("\"\\\"Some escaped quotes\\\"\"", new sequence<any>, "\"Some escaped quotes\"", "escaped double quotes inside double quotes")
+			.addTest("'\\'Some escaped quotes\\''", new sequence<any>, "'Some escaped quotes'", "escaped single quotes inside single quotes")
+			
+			.run();
+	}  
+}

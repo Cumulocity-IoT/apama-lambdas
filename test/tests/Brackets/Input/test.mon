@@ -1,0 +1,13 @@
+using utils.TestRunner;
+
+event TestEvent {}
+
+monitor Test {  
+	action onload() {
+		TestRunner.create()
+			.addTest("(10 + 2) * 2", new sequence<any>, 24, "brackets to override operator precedence")
+			.addTest("((((10) + (2))) * (-(-2)))", new sequence<any>, 24, "nested brackets")
+
+			.run();
+	}  
+}

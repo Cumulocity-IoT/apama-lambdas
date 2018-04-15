@@ -1,0 +1,52 @@
+using utils.TestRunner;
+
+event TestEvent {}
+
+monitor Test {  
+	action onload() {
+		TestRunner.create()
+			.addTest("10.pow(2)", new sequence<any>, 100, "integer pow")
+			.addTest("10.pow(-2)", new sequence<any>, 0.01, "integer negative pow")
+			.addTest("10.0.pow(2.0)", new sequence<any>, 100.0, "float pow")
+			.addTest("10.0d.pow(2.0d)", new sequence<any>, 100.0d, "double pow")
+		
+			.addTest("16.sqrt()", new sequence<any>, 4.0, "integer sqrt")
+			.addTest("16.0.sqrt()", new sequence<any>, 4.0, "float sqrt")
+			.addTest("16.0d.sqrt()", new sequence<any>, 4.0d, "double sqrt")
+
+			.addTest("10.abs()", new sequence<any>, 10, "positive integer abs")
+			.addTest("(-10).abs()", new sequence<any>, 10, "negative integer abs")
+			.addTest("10.0.abs()", new sequence<any>, 10.0, "positive float sqrt")
+			.addTest("(-10.0).abs()", new sequence<any>, 10.0, "negative float sqrt")
+			.addTest("10.0d.abs()", new sequence<any>, 10.0d, "positive decimal abs")
+			.addTest("(-10.0d).abs()", new sequence<any>, 10.0d, "negative decimal abs")
+		
+			.addTest("x => x.getTypeName()", [<any>TestEvent()], "TestEvent", "getTypeName")
+		
+			.addTest("16.toFloat()", new sequence<any>, 16.0, "integer toFloat")
+			.addTest("16.0.toFloat()", new sequence<any>, 16.0, "float toFloat")
+			.addTest("16.0d.toFloat()", new sequence<any>, 16.0, "double toFloat")
+		
+			.addTest("16.toDecimal()", new sequence<any>, 16.0d, "integer toDecimal")
+			.addTest("16.0.toDecimal()", new sequence<any>, 16.0d, "float toDecimal")
+			.addTest("16.0d.toDecimal()", new sequence<any>, 16.0d, "double toDecimal")
+
+			.addTest("16.round()", new sequence<any>, 16, "integer round")
+			.addTest("15.5.round()", new sequence<any>, 16, "float round")
+			.addTest("15.5d.round()", new sequence<any>, 16, "double round")
+			
+			.addTest("16.ceil()", new sequence<any>, 16, "integer ceil")
+			.addTest("16.1.ceil()", new sequence<any>, 17, "float ceil")
+			.addTest("16.1d.ceil()", new sequence<any>, 17, "double ceil")
+		
+			.addTest("16.floor()", new sequence<any>, 16, "integer floor")
+			.addTest("16.9.floor()", new sequence<any>, 16, "float floor")
+			.addTest("16.9d.floor()", new sequence<any>, 16, "double floor")
+
+			.addTest("16.toString()", new sequence<any>, "16", "integer toString")
+			.addTest("'Hello'.toString()", new sequence<any>, "Hello", "string toString")
+			.addTest("x => x.toString()", [<any>TestEvent()], "TestEvent()", "getTypeName")
+
+			.run();
+	}  
+}

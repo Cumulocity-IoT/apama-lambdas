@@ -8,20 +8,16 @@ setlocal
 
 REM Setup the Apama Environment
 IF DEFINED APAMA_HOME (
-  call "%APAMA_HOME%\bin\apama_env.bat"
+    call "%APAMA_HOME%\bin\apama_env.bat"
 ) ELSE (
-  echo Could not find Apama installation
-  goto error
-)
-
-if exist "%~dp0output" (
-  rmdir /S /Q "%~dp0output"
+    goto error
 )
 
 cd test
 
-pysys clean
+pysys run -n8 -vCRIT
 
 goto:eof
 
 :error
+echo Could not find Apama installation

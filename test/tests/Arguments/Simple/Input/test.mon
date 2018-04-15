@@ -1,0 +1,12 @@
+using utils.TestRunner;
+
+monitor Test {  
+	action onload() {
+		TestRunner.create()
+			.addTest("x => x", [<any>10], 10, "Single Arg")
+			.addTest("x, y, z => [z,y,x]", [<any>10,20,30], [<any>30,20,10], "Multiple Args")
+			.addTest("x, y => [$2,y,x]", [<any>10,20,30], [<any>30,20,10], "Unnamed Args")
+				
+			.run();
+	}  
+}
