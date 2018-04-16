@@ -128,6 +128,12 @@ Lambda<span class="token punctuation">.</span><span class="token function">funct
 </code></pre>
 <p><strong>Special Values</strong><br>
 <code>currentTime</code> - The same as in EPL - Gets the current time in seconds (usually rounded to nearest 100ms)</p>
+<p><strong>Event Construction</strong><br>
+Events can be constructed in the standard epl form:</p>
+<pre class=" language-javascript"><code class="prism  language-javascript">Lambda<span class="token punctuation">.</span><span class="token function">function1</span><span class="token punctuation">(</span><span class="token string">"x =&gt; com.example.MyFirstEvent(x, x)"</span><span class="token punctuation">)</span>
+</code></pre>
+<p>Event names <strong>must be fully qualified</strong> (regardless of any <code>using</code> statements)<br>
+Where possible automatic <a href="#coercion">coercion</a> will occur for all fields.</p>
 <p><strong>Action Calling</strong><br>
 Calling actions in a generic way is not possible in Apama 10.1, so only a handful of particularly useful actions are supported. This will improve in 10.2.</p>
 
@@ -139,6 +145,10 @@ Calling actions in a generic way is not possible in Apama 10.1, so only a handfu
 </tr>
 </thead>
 <tbody>
+<tr>
+<td align="right"><code>.toString()</code></td>
+<td>Call on any type to convert it to a string (has no effect on strings)</td>
+</tr>
 <tr>
 <td align="right"><code>.toFloat()</code></td>
 <td>Call on any numeric type to convert to float</td>
@@ -172,16 +182,17 @@ Calling actions in a generic way is not possible in Apama 10.1, so only a handfu
 <td>Call on any numeric type to square root the value</td>
 </tr>
 <tr>
-<td align="right"><code>.toString()</code></td>
-<td>Call on any type to convert it to a string (has no effect on strings)</td>
+<td align="right"><code>.getTypeName()</code></td>
+<td>Call on any type to get its type name as a string</td>
 </tr>
 </tbody>
 </table><p><strong>Sequence Literals</strong><br>
 Sequences can be constructed in lambdas in much the same way that they can in EPL, except that they are always <code>sequence&lt;any&gt;</code>.</p>
 <pre class=" language-javascript"><code class="prism  language-javascript">Lambda<span class="token punctuation">.</span><span class="token function">function1</span><span class="token punctuation">(</span><span class="token string">"x =&gt; [x, x + 1, x + 2]"</span><span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token operator">&lt;</span>any<span class="token operator">&gt;</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">]</span>
 </code></pre>
-<p><strong>Spread Operator</strong></p>
-<pre class=" language-javascript"><code class="prism  language-javascript">Lambda<span class="token punctuation">.</span><span class="token function">function1</span><span class="token punctuation">(</span>"x <span class="token operator">=&gt;</span> <span class="token punctuation">[</span><span class="token operator">...</span>x<span class="token punctuation">,</span> <span class="token operator">...</span>x<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token operator">&lt;</span>any<span class="token operator">&gt;</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">]</span>
+<p><strong>Spread Operator</strong><br>
+The spread operator expands a sequence inside another sequence:</p>
+<pre class=" language-javascript"><code class="prism  language-javascript">Lambda<span class="token punctuation">.</span><span class="token function">function1</span><span class="token punctuation">(</span>"x <span class="token operator">=&gt;</span> <span class="token punctuation">[</span><span class="token operator">...</span>x<span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token operator">&lt;</span>any<span class="token operator">&gt;</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">]</span>
 </code></pre>
 <p><strong>Array Destructuring</strong><br>
 When using lambdas (particularly with Observables) you may find that a lambda is provided with a sequence as the argument. Rather than accessing each value using <code>seq[index]</code> it is easier to assign a name to each item in the sequence:</p>

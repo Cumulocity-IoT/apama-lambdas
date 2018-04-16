@@ -119,11 +119,20 @@ Lambda.function1("seq0 => seq0[0]")
 **Special Values**
 `currentTime` - The same as in EPL - Gets the current time in seconds (usually rounded to nearest 100ms) 
 
+**Event Construction**
+Events can be constructed in the standard epl form:
+```javascript
+Lambda.function1("x => com.example.MyFirstEvent(x, x)")
+```
+Event names **must be fully qualified** (regardless of any `using` statements)
+Where possible automatic [coercion](#coercion) will occur for all fields.
+
 **Action Calling**
 Calling actions in a generic way is not possible in Apama 10.1, so only a handful of particularly useful actions are supported. This will improve in 10.2.
 
 |Action          |Description                                                   |
 |---------------:|--------------------------------------------------------------|
+|   `.toString()`|Call on any type to convert it to a string (has no effect on strings)|
 |    `.toFloat()`|Call on any numeric type to convert to float                  |
 |  `.toDecimal()`|Call on any numeric type to convert to decimal                |
 |      `.round()`|Call on any numeric type to round to an integer               |
@@ -132,16 +141,16 @@ Calling actions in a generic way is not possible in Apama 10.1, so only a handfu
 |        `.abs()`|Call on any numeric type to provide the non-negative value    |
 |       `.pow(n)`|Call on any numeric type to raise it to the `n`^th^ power     |
 |       `.sqrt()`|Call on any numeric type to square root the value             |
-|   `.toString()`|Call on any type to convert it to a string (has no effect on strings)|
-
+|`.getTypeName()`|Call on any type to get its type name as a string             |
 **Sequence Literals**
 Sequences can be constructed in lambdas in much the same way that they can in EPL, except that they are always `sequence<any>`.
 ```javascript
 Lambda.function1("x => [x, x + 1, x + 2]")(0) = [<any>0, 1, 2]
 ```
 **Spread Operator**
+The spread operator expands a sequence inside another sequence:
 ```javascript
-Lambda.function1("x => [...x, ...x])([0, 1, 2]) = [<any>0, 1, 2, 0, 1, 2]
+Lambda.function1("x => [...x, 3, 4, 5])([0, 1, 2]) = [<any>0, 1, 2, 3, 4, 5]
 ```
 **Array Destructuring**
 When using lambdas (particularly with Observables) you may find that a lambda is provided with a sequence as the argument. Rather than accessing each value using `seq[index]` it is easier to assign a name to each item in the sequence:
