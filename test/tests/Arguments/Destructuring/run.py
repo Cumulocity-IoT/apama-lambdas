@@ -11,7 +11,7 @@ class PySysTest(BaseTest):
 	def execute(self):
 		correlator = CorrelatorHelper(self, name='correlator')
 		correlator.start(logfile='correlator.log')
-		correlator.injectCDP(filenames='Lambda.cdp', filedir=PROJECT.TEST_SUBJECT_DIR)
+		correlator.injectCDP(filenames='Lambdas.cdp', filedir=PROJECT.TEST_SUBJECT_DIR)
 		correlator.flush()
 		correlator.injectEPL(filenames='testUtils.mon', filedir=PROJECT.UTILS_DIR)
 		

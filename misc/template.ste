@@ -1,0 +1,9 @@
+#  This is the Lambdas home installation
+
+VARIABLE; LAMBDAS_HOME; <%LAMBDAS_HOME%>; R
+
+STRING_SUBSTITUTION; LAMBDAS_HOME; <%LAMBDAS_HOME%>; This is contributed by Lambdas; R
+
+BUNDLE_CATALOG; LAMBDAS_HOME/bundles
+
+VERSION; 1.0
