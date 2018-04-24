@@ -1,7 +1,9 @@
 param (
    [string]$sagInstallDir = (.\misc\getSagInstallDir),
-   [string]$output = "$PSScriptRoot\output\RxEPL"
+   [string]$output = "$(Split-Path $MyInvocation.MyCommand.Path -Parent)\output\Lambdas"
 )
+
+if(!$PSScriptRoot){ $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent }
 
 $apamaInstallDir = "$sagInstallDir\Apama"
 if (-not (Test-Path $apamaInstallDir)) {
@@ -12,7 +14,7 @@ echo "Using Apama located in: $apamaInstallDir"
 
 $apamaBin = "$apamaInstallDir\bin"
 
-if (-not (Test-Path "$output\cdp\RxEPL.cdp")) {
+if (-not (Test-Path "$output\cdp\Lambdas.cdp")) {
 	echo "Unable to find build, building..."
 	.\build
 }
