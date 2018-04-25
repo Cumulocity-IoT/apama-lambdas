@@ -13,7 +13,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --->
-
 # Lambdas
 ## Contents
 * [Installation](#install)
@@ -22,15 +21,32 @@ limitations under the License.
 * [Different Types of Lambdas](#lambda-types) 
 * [Language Features](#language) 
 
+
 ## <a id="install"></a>Installation
-### 1. Installing files
-Copy the folders contained inside `CopyContentsToApamaInstallDir` into the Apama install directory (Usually `C:\SoftwareAG\Apama` on Windows or `/opt/softwareag/apama` on Unix), merging them with what is already there.
-### 2. Adding to Designer
-1. From designer right click on your project in `Project Explorer`
+The deployment script provides a way to make Lambdas for EPL globally available to all SoftwareAG Designer workspaces.
+### 1. Installing into Designer
+1. Place the Lambdas folder somewhere safe (somewhere not likely to be moved or deleted)
+2. Run the deploy.bat
+3. Follow the instructions
+4. Restart any running instances of SoftwareAG Designer
+
+### 2. Adding to a Project
+1. From SoftwareAG Designer right click on your project in `Project Explorer`
 2. Select `Apama` from the drop down menu;
 3. Select `Add Bundle`
-4. Scroll down to `Standard bundles` and select `Lambdas`
+4. Scroll down to `Standard bundles` and select `Lambdas for EPL`
 5. Click `Ok`
+
+When run via Designer, it will automatically inject all of the dependencies.
+
+### 3. Packaging a project (For use outside Designer)
+The Apama tool `engine_deploy` packages a project so that it can be run outside of designer.
+1. Start an Apama Command Prompt (Start menu, Software AG, Tools, Apama, Apama Command Prompt)
+2. `cd` to your project directory
+3. Run `engine_deploy --outputDeployDir output.zip . <rx_epl_install_dir>/lambdas.properties`.
+You'll end up with a zip of your entire project.
+4. Unzip it on whichever machine you'd like to use the project.
+5. Run `correlator --config initialization.yaml --config initialization.properties` from within the unzipped directory to run the project.
 
 ## <a id="intro"></a>Introduction to Lambdas
 Lambdas in EPL are closely based on Arrow Functions in JavaScript. They are inline actions that manipulate one or more provided values, implicitly returning the result.

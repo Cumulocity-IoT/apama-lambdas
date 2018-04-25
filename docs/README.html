@@ -39,15 +39,32 @@
 <li><a href="#language">Language Features</a></li>
 </ul>
 <h2 id="a-idinstallainstallation"><a id="install"></a>Installation</h2>
-<h3 id="installing-files">1. Installing files</h3>
-<p>Copy the folders contained inside <code>CopyContentsToApamaInstallDir</code> into the Apama install directory (Usually <code>C:\SoftwareAG\Apama</code> on Windows or <code>/opt/softwareag/apama</code> on Unix), merging them with what is already there.</p>
-<h3 id="adding-to-designer">2. Adding to Designer</h3>
+<p>The deployment script provides a way to make Lambdas for EPL globally available to all SoftwareAG Designer workspaces.</p>
+<h3 id="installing-into-designer">1. Installing into Designer</h3>
 <ol>
-<li>From designer right click on your project in <code>Project Explorer</code></li>
+<li>Place the Lambdas folder somewhere safe (somewhere not likely to be moved or deleted)</li>
+<li>Run the deploy.bat</li>
+<li>Follow the instructions</li>
+<li>Restart any running instances of SoftwareAG Designer</li>
+</ol>
+<h3 id="adding-to-a-project">2. Adding to a Project</h3>
+<ol>
+<li>From SoftwareAG Designer right click on your project in <code>Project Explorer</code></li>
 <li>Select <code>Apama</code> from the drop down menu;</li>
 <li>Select <code>Add Bundle</code></li>
-<li>Scroll down to <code>Standard bundles</code> and select <code>Lambdas</code></li>
+<li>Scroll down to <code>Standard bundles</code> and select <code>Lambdas for EPL</code></li>
 <li>Click <code>Ok</code></li>
+</ol>
+<p>When run via Designer, it will automatically inject all of the dependencies.</p>
+<h3 id="packaging-a-project-for-use-outside-designer">3. Packaging a project (For use outside Designer)</h3>
+<p>The Apama tool <code>engine_deploy</code> packages a project so that it can be run outside of designer.</p>
+<ol>
+<li>Start an Apama Command Prompt (Start menu, Software AG, Tools, Apama, Apama Command Prompt)</li>
+<li><code>cd</code> to your project directory</li>
+<li>Run <code>engine_deploy --outputDeployDir output.zip . &lt;rx_epl_install_dir&gt;/lambdas.properties</code>.<br>
+You’ll end up with a zip of your entire project.</li>
+<li>Unzip it on whichever machine you’d like to use the project.</li>
+<li>Run <code>correlator --config initialization.yaml --config initialization.properties</code> from within the unzipped directory to run the project.</li>
 </ol>
 <h2 id="a-idintroaintroduction-to-lambdas"><a id="intro"></a>Introduction to Lambdas</h2>
 <p>Lambdas in EPL are closely based on Arrow Functions in JavaScript. They are inline actions that manipulate one or more provided values, implicitly returning the result.</p>
