@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bundle name="Lambdas" display-name="Lambdas" type="monitorscript" singleton="true">
+<bundle name="Lambdas" display-name="<%displayName%>" type="monitorscript" singleton="true">
 	<version>
 		<id><%version%></id>
 		<date><%date%></date>
@@ -10,7 +10,7 @@
 		Functional Lambdas for EPL
 	</description>
 	<monitors>
-		<fileset dir="${LAMBDAS_HOME}/code/lambdas">
+		<fileset dir="${LAMBDAS_HOME}">
 <%fileList%>
 		</fileset>
 	</monitors>
