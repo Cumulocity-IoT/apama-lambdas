@@ -34,7 +34,7 @@ The deployment script provides a way to make Lambdas for EPL globally available 
 1. From SoftwareAG Designer right click on your project in `Project Explorer`
 2. Select `Apama` from the drop down menu;
 3. Select `Add Bundle`
-4. Scroll down to `Standard bundles` and select `Lambdas for EPL`
+4. Scroll down to `LAMBDAS_HOME/bundles` and select `Lambdas for EPL`
 5. Click `Ok`
 
 When run via Designer, it will automatically inject all of the dependencies.
@@ -174,6 +174,7 @@ Calling actions in a generic way is not possible in Apama 10.1, so only a handfu
 |       `.pow(n)`|Call on any numeric type to raise it to the `n`^th^ power     |
 |       `.sqrt()`|Call on any numeric type to square root the value             |
 |`.getTypeName()`|Call on any type to get its type name as a string             |
+
 **Sequence Literals**
 Sequences can be constructed in lambdas in much the same way that they can in EPL, except that they are always `sequence<any>`.
 ```javascript
@@ -182,7 +183,7 @@ Lambda.function1("x => [x, x + 1, x + 2]")(0) = [<any>0, 1, 2]
 **Spread Operator**
 The spread operator expands a sequence inside another sequence:
 ```javascript
-Lambda.function1("x => [...x, 3, 4, 5])([0, 1, 2]) = [<any>0, 1, 2, 3, 4, 5]
+Lambda.function1("x => [...x, 3, 4, 5]")([0, 1, 2]) = [<any>0, 1, 2, 3, 4, 5]
 ```
 **Array Destructuring**
 When using lambdas (particularly with Observables) you may find that a lambda is provided with a sequence as the argument. Rather than accessing each value using `seq[index]` it is easier to assign a name to each item in the sequence:
