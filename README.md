@@ -13,14 +13,20 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --->
-# Lambdas
+# <a id="intro"></a>Lambdas
+Lambdas in EPL are closely based on Arrow Functions in JavaScript. They are inline actions that manipulate one or more provided values, implicitly returning the result.
+```javascript
+action<any> returns any multiplyBy10:= Lambda.function1("x => x * 10");
+
+multiplyBy10(1.5) = <any> 15.0;
+```
+
 ## Contents
-* [Installation](#install)
 * [Introduction to Lambdas](#intro) 
+* [Installation](#install)
 * [When to Use Lambdas?](#usage)
 * [Different Types of Lambdas](#lambda-types) 
 * [Language Features](#language) 
-
 
 ## <a id="install"></a>Installation
 The deployment script provides a way to make Lambdas for EPL globally available to all SoftwareAG Designer workspaces.
@@ -48,13 +54,6 @@ You'll end up with a zip of your entire project.
 4. Unzip it on whichever machine you'd like to use the project.
 5. Run `correlator --config initialization.yaml --config initialization.properties` from within the unzipped directory to run the project.
 
-## <a id="intro"></a>Introduction to Lambdas
-Lambdas in EPL are closely based on Arrow Functions in JavaScript. They are inline actions that manipulate one or more provided values, implicitly returning the result.
-```javascript
-action<any> returns any multiplyBy10:= Lambda.function1("x => x * 10");
-
-multiplyBy10(1.5) = <any> 15.0;
-```
 ## <a id="usage"></a>When to Use Lambdas?
 Ever find yourself writing this:
 ```javascript
