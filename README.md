@@ -21,6 +21,8 @@ action<any> returns any multiplyBy10:= Lambda.function1("x => x * 10");
 multiplyBy10(1.5) = <any> 15.0;
 ```
 
+This library is particularly useful with [RxEPL](https://github.com/SoftwareAG/apama-rxepl) (A functional programming library, similar to streams)
+
 ## Contents
 * [Installation](#install)
 * [When to Use Lambdas?](#usage)
@@ -72,7 +74,7 @@ You can simplify the code by doing this:
 ```javascript
 aFunctionThatTakesACallback(Lambda.function2("arg1, arg2 => arg1 + arg2 + 30"));
 ```
-This is particularly useful when used with functional programming
+This is particularly useful when used with functional programming (Eg. [RxEPL](https://github.com/SoftwareAG/apama-rxepl))
 ```javascript
 Observable.fromValues([1,2,3,4,5])
 	.filter(Lambda.predicate("x => x % 2 = 0"))
