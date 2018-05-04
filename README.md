@@ -22,14 +22,16 @@ multiplyBy10(1.5) = <any> 15.0;
 ```
 
 ## Contents
-* [Introduction to Lambdas](#intro) 
 * [Installation](#install)
 * [When to Use Lambdas?](#usage)
 * [Different Types of Lambdas](#lambda-types) 
 * [Language Features](#language) 
 
 ## <a id="install"></a>Installation
-The deployment script provides a way to make Lambdas for EPL globally available to all SoftwareAG Designer workspaces.
+
+First head over to the [Release Area](https://github.com/SoftwareAG/apama-lambdas/releases) and download the latest release.
+
+The deployment script (Inside the release) provides a way to make Lambdas for EPL globally available to all SoftwareAG Designer workspaces.
 ### 1. Installing into Designer
 1. Place the Lambdas folder somewhere safe (somewhere not likely to be moved or deleted)
 2. Run the deploy.bat
