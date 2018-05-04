@@ -200,3 +200,6 @@ Numbers and sometimes values are coerced to sensible types, using the following 
 * Operations on any type and `string` will call `.valueToString` on the any type
 
 If you need the result to be a particular type (and that isn't possible through explicit typing eg. `22.0d`) then use the `.toFloat()`, `.toDecimal()`, `.round()`, `ceil()`, `.floor()`, `.toString()` actions.
+------------------------------
+
+These tools are provided as-is and without warranty or support. They do not constitute part of the Software AG product suite. Users are free to use, fork and modify them, subject to the license agreement. While Software AG welcomes contributions, we cannot guarantee to include every contribution in the master project.
