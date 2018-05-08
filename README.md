@@ -99,7 +99,7 @@ action<any> returns boolean ex := Lambda.predicate("x => x >= 10 and x < 20");
 ```
 **Call (Awaiting Apama 10.2)** - Run a lambda just for side-effects (Not yet possible)
 ```javascript
-action<any> returns boolean ex := Lambda.call("x => x.doSomething(10 + 3)");
+action<any> ex := Lambda.call("x => x.doSomething(10 + 3)");
 ```
 ## <a id="language"></a>Language Features
 Lambdas attempt to provide a language very close to EPL but without the need for casting. You will never have to write  `<sequence<float, boolean> >` within a lambda!
