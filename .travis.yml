@@ -1,0 +1,28 @@
+sudo: false
+
+cache:
+    directories:
+        - softwareag
+
+addons:
+  apt: # install dependencies
+    update: true
+    sources:
+    - sourceline: 'deb [arch=amd64] https://packages.microsoft.com/ubuntu/14.04/prod trusty main'
+      key_url: 'https://packages.microsoft.com/keys/microsoft.asc'
+    packages:
+    - unzip
+    - expect
+    - powershell
+  
+install: # install apama
+  - ./travis-scripts/install-apama-if-not-exists
+  
+before_script: # add various apama utils to the path (eg. engine_deploy)
+  - source ./softwareag/Apama/bin/apama_env
+  
+script: 
+  # Build the project
+  - ./build.ps1 -sagInstallDir ./softwareag -forTest
+  # Test the project
+  - ./travis-scripts/test-with-exitcode
