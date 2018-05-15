@@ -1,3 +1,5 @@
+#!/usr/bin/pwsh -f
+
 # Copyright 2018 Software AG
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,7 +22,7 @@ param (
 if(!$PSScriptRoot){ $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent }
 
 if (!$sagInstallDir) {
-	$sagInstallDir = (& "$(Split-Path $MyInvocation.MyCommand.Path -Parent)\getSagInstallDir")
+	$sagInstallDir = (& "$(Split-Path $MyInvocation.MyCommand.Path -Parent)/getSagInstallDir")
 	
 	if (!$notInteractive) {
 		$temp = Read-Host "Where is your SoftwareAG install folder? (blank=$sagInstallDir)"
@@ -31,18 +33,18 @@ if (!$sagInstallDir) {
 	}
 }
 
-$apamaInstallDir = "$sagInstallDir\Apama"
+$apamaInstallDir = "$sagInstallDir/Apama"
 if (-not (Test-Path $apamaInstallDir)) {
-	Throw "Could not find Apama Installation: $sagInstallDir\Apama"
+	Throw "Could not find Apama Installation: $sagInstallDir/Apama"
 }
 
-$lambdasHome = (Resolve-Path "$PSScriptRoot\..") -replace "\\","/"
+$lambdasHome = (Resolve-Path "$PSScriptRoot/..") -replace "\\","/"
 
-$steFile = cat "$PSScriptRoot\template.ste"
+$steFile = cat "$PSScriptRoot/template.ste"
 $steFile = $steFile | %{$_ -replace "<%LAMBDAS_HOME%>", $lambdasHome}
 $steFile | Out-File -encoding utf8 "$sagInstallDir/Designer/extensions/lambdas.ste"
 
-[IO.File]::WriteAllLines("$lambdasHome\lambdas.properties", "LAMBDAS_HOME=$lambdasHome")
+[IO.File]::WriteAllLines("$lambdasHome/lambdas.properties", "LAMBDAS_HOME=$lambdasHome")
 
 if ($notInteractive) {
 	Write-Host "Done! Please restart designer."
