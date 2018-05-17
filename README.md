@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --->
-# <a id="intro"></a>Lambdas [![Build Status](https://travis-ci.org/SoftwareAG/apama-lambdas.svg?branch=master)](https://travis-ci.org/SoftwareAG/apama-lambdas)
+# <a id="intro"></a>Lambdas [![Build Status](https://travis-ci.org/SoftwareAG/apama-lambdas.svg?branch=master)](https://travis-ci.org/SoftwareAG/apama-lambdas) [![Coverage Status](https://coveralls.io/repos/github/SoftwareAG/apama-lambdas/badge.svg)](https://coveralls.io/github/SoftwareAG/apama-lambdas)
 This is a library that adds lambdas to [Apama](http://www.apamacommunity.com/).
 
 Lambdas in EPL (Apama's programming language) are closely based on Arrow Functions in JavaScript. They are inline actions that manipulate one or more provided values, implicitly returning the result.
