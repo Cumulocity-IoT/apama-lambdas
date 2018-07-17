@@ -31,6 +31,34 @@ event Undefined {
 	}
 }
 
+event ClosureActionHandler {
+	dictionary<string, action<> returns any> closureGetters; 
+	string actionName; 
+	sequence<action<> returns any> args;
+	
+	static action create(dictionary<string, action<> returns any> closureGetters, string actionName, sequence<action<> returns any> args) returns action<> returns any {
+		return ClosureActionHandler(closureGetters, actionName, args).callback;
+	}
+	
+	action callback() returns any {
+		any action_ := closureGetters[actionName]();
+		action<sequence<any> > returns any genericAction := action_.getGenericAction();
+		
+		sequence<any> argValues := new sequence<any>;
+		
+		dictionary<string, string> paramTypes := action_.getActionParameters();
+		integer i := 0;
+		string paramName;
+		for paramName in action_.getActionParameterNames() {
+			string paramType := paramTypes[paramName];
+			argValues.append(TypeCoercion.coerceValue(args[i](), paramType));
+			i := i + 1;
+		}
+		
+		return genericAction(argValues);
+	}
+}
+
 event KnownActionHandler {
 	action<> returns any subject;
 	action<action<> returns any, sequence<action<> returns any> > returns any handler;
@@ -170,50 +198,8 @@ event EventConstructor {
 		integer i := 0;
 		string fieldName;
 		for fieldName in result.getFieldNames() {
-			any value := args[i]();
 			string fieldType := fieldTypes[i];
-			if fieldType = "float" {
-				switch(value as v) {
-					case decimal: {
-						value := v.toFloat();
-					}
-					case integer: {
-						value := v.toFloat();
-					}
-					case string: {
-						value := float.parse(v);
-					}
-					default: {}
-				}
-			} else if fieldType = "decimal" {
-				switch(value as v) {
-					case float: {
-						value := v.toDecimal();
-					}
-					case integer: {
-						value := v.toDecimal();
-					}
-					case string: {
-						value := decimal.parse(v);
-					}
-					default: {}
-				}				
-			} else if fieldType = "integer" {
-				switch(value as v) {
-					case float: {
-						value := v.round();
-					}
-					case decimal: {
-						value := v.round();
-					}
-					case string: {
-						value := integer.parse(v);
-					}
-					default: {}
-				}				
-			} else if fieldType = "string" {
-				value := value.valueToString();
-			}
+			any value := TypeCoercion.coerceValue(args[i](), fieldType);
 			result.setField(fieldName, value);
 			i := i + 1;
 		}
@@ -460,21 +446,34 @@ event ExpressionCompiler {
 							
 							sequence<action<> returns any> args := new sequence<action<> returns any>;
 							if not innerExpression.matches("\\s*") {
-								sequence<string> argStrings := ",".split(innerExpression);
+								sequence<string> argStrings := ",".split(innerExpression); // safe to split because all other commas will have been removed
 								string arg;
 								for arg in argStrings {
 									args.append(ExpressionCompiler.create(arg, closureGetters).compile());
 								}
 							}
-														
+
 							string actionPointerName := "$_" + integer.getUnique().toString();
 							closureGetters.add(actionPointerName, KnownActionHandler.create(subject, actionName, args));
 							expression := expression.substring(0, completedBracket.start - fieldAccessAndActionName.length()) + actionPointerName + expression.substring(i + 1, expression.length());
 							i := completedBracket.start + actionPointerName.length() - fieldAccessAndActionName.length() - 1;
 						} else {
-							// We've got an action call (don't know the name of the action)
-							// TODO: In 10.2 we can handle this more generically by calling getGenericAction
-							throw Exception("Can't currently call most actions (.pow(...), .sqrt() etc are ok)", "CompilationException");
+							// This is an action directly from the closure
+							string actionName := fieldAccessAndActionName;
+
+							sequence<action<> returns any> args := new sequence<action<> returns any>;
+							if not innerExpression.matches("\\s*") {
+								sequence<string> argStrings := ",".split(innerExpression); // safe to split because all other commas will have been removed
+								string arg;
+								for arg in argStrings {
+									args.append(ExpressionCompiler.create(arg, closureGetters).compile());
+								}
+							}
+							
+							string actionPointerName := "$_" + integer.getUnique().toString();
+							closureGetters.add(actionPointerName, ClosureActionHandler.create(closureGetters, actionName, args));
+							expression := expression.substring(0, completedBracket.start - fieldAccessAndActionName.length()) + actionPointerName + expression.substring(i + 1, expression.length());
+							i := completedBracket.start + actionPointerName.length() - fieldAccessAndActionName.length() - 1;
 						}
 					}
 				} else {
