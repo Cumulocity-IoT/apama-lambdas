@@ -76,3 +76,51 @@ event ToFixedArgCount {
 		return function([value1, value2]);
 	}
 }
+
+event TypeCoercion {
+	static action coerceValue(any value, string type) returns any {
+		if type = "float" {
+			switch(value as v) {
+				case decimal: {
+					return v.toFloat();
+				}
+				case integer: {
+					return v.toFloat();
+				}
+				case string: {
+					return float.parse(v);
+				}
+				default: {}
+			}
+		} else if type = "decimal" {
+			switch(value as v) {
+				case float: {
+					return v.toDecimal();
+				}
+				case integer: {
+					return v.toDecimal();
+				}
+				case string: {
+					return decimal.parse(v);
+				}
+				default: {}
+			}				
+		} else if type = "integer" {
+			switch(value as v) {
+				case float: {
+					return v.round();
+				}
+				case decimal: {
+					return v.round();
+				}
+				case string: {
+					return integer.parse(v);
+				}
+				default: {}
+			}				
+		} else if type = "string" {
+			return value.valueToString();
+		}
+		return value;
+	}
+}

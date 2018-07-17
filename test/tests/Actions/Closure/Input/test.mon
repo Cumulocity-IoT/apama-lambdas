@@ -1,0 +1,25 @@
+using utils.TestRunner;
+
+event TestEvent {
+	float val;
+}
+
+monitor Test {  
+	action onload() {
+		TestRunner.create()
+			.addTest("x => x(10.0, 2.0)", [<any> testAction], 8.0, "float args to float action")
+			.addTest("x => x(10, 2)", [<any> testAction], 8.0, "int args to float action")
+			.addTest("x => x(10.0d, 2.0d)", [<any> testAction], 8.0, "decimal args to float action")
+			.addTest("x => x('10', '2.0')", [<any> testAction], 8.0, "string args to float action")
+			.addTest("x => x(10.0d, 2)", [<any> testAction], 8.0, "mixed args to float action")
+
+			.addTest("x => x(x(11.0d, 1), x('6', 4.0))", [<any> testAction], 8.0, "nested args to float action")
+			.addTest("x => x([11.0d, 10, 9.0][1], TestEvent(x('6', 4)).val)", [<any> testAction], 8.0, "complex args to float action")
+		
+			.run();
+	}
+	
+	action testAction(float left, float right) returns float {
+		return left - right;
+	}
+}
