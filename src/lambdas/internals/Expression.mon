@@ -59,30 +59,91 @@ event ClosureActionHandler {
 	}
 }
 
-event KnownActionHandler {
+event ActionHandler {
 	action<> returns any subject;
-	action<action<> returns any, sequence<action<> returns any> > returns any handler;
+	string actionName;
 	sequence<action<> returns any> args;
+	action<any, sequence<any> > returns any knownActionHandler;
 	
 	static action create(action<> returns any subject, string actionName, sequence<action<> returns any> args) returns action<> returns any {		
-		dictionary<string, action<action<> returns any, sequence<action<> returns any> > returns any > knownActions := {
+		dictionary<string, action<any, sequence<any> > returns any > knownActions := {
 			"pow": KnownActions.pow,
 			"sqrt": KnownActions.sqrt,
-			"abs": KnownActions.abs,
-			"getTypeName": KnownActions.getTypeName,
 			"toFloat": KnownActions.toFloat,
 			"toDecimal": KnownActions.toDecimal,
 			"ceil": KnownActions.ceil,
 			"floor": KnownActions.floor,
 			"round": KnownActions.round,
-			"toString": KnownActions.toString_
+			"get": KnownActions.get,
+			"getOr": KnownActions.getOr,
+			"getOrDefault": KnownActions.getOrDefault,
+			"getOrAdd": KnownActions.getOrAdd,
+			"getOrAddDefault": KnownActions.getOrAddDefault,
+			"hasKey": KnownActions.hasKey,
+			"append": KnownActions.append,
+			"add": KnownActions.add
 		};
 		
-		return KnownActionHandler(subject, knownActions[actionName], args).callback;
+		if (knownActions.hasKey(actionName)) {
+			return ActionHandler(subject, actionName, args, knownActions[actionName]).callback;
+		} else {
+			return ActionHandler(subject, actionName, args, new action<any, sequence<any> > returns any).callback;
+		}
 	}
 	
 	action callback() returns any {
-		return handler(subject, args);
+		sequence<any> argVals := new sequence<any>;
+		action<> returns any arg;
+		for arg in args {
+			argVals.append(arg());
+		}
+		
+		any subjectVal := subject();
+		
+		// Try to get the action from the object, if it doesn't exist then check the known actions
+		any act;
+		try {
+			act := subjectVal.getAction(actionName);
+		} catch(Exception e) {
+			ifpresent knownActionHandler {	
+				return knownActionHandler(subjectVal, argVals);
+			} else {
+				throw Exception("No action " + actionName + " available on " + subjectVal.toString(), "RuntimeException");
+			}
+		}
+		
+		dictionary<string, string> paramTypes;
+		try {
+			paramTypes := act.getActionParameters();
+		} catch(Exception e) {
+			// Try to enable all builtin actions to be coerced by wrapping for signatures that we know about (all combinations of "action<primitive|none> returns primitive|none" and some others)
+			act := WrapBuiltinAction.create(act);
+			try {
+				paramTypes := act.getActionParameters();
+			} catch(Exception e) {
+				// Try to call with specific handling for complicated ones like dictionary/sequence
+				ifpresent knownActionHandler {	
+					return knownActionHandler(subjectVal, argVals);
+				} else {
+					// Attempt to call without coercion
+					return act.getGenericAction()(argVals);
+				}
+			}
+		}
+	
+		if paramTypes.size() != argVals.size() {
+			throw Exception("action \"" + actionName + "\" must have " + paramTypes.size().toString() + " arguments", "IllegalArgumentException");
+		}
+	
+		// Coerce the values to their appropriate type
+		string paramName;
+		integer i := 0;
+		for paramName in act.getActionParameterNames() {
+			argVals[i] := TypeCoercion.coerceValue(argVals[i], paramTypes[paramName]);
+			i := i + 1;
+		}
+		
+		return act.getGenericAction()(argVals);
 	}
 }
 
@@ -454,7 +515,7 @@ event ExpressionCompiler {
 							}
 
 							string actionPointerName := "$_" + integer.getUnique().toString();
-							closureGetters.add(actionPointerName, KnownActionHandler.create(subject, actionName, args));
+							closureGetters.add(actionPointerName, ActionHandler.create(subject, actionName, args));
 							expression := expression.substring(0, completedBracket.start - fieldAccessAndActionName.length()) + actionPointerName + expression.substring(i + 1, expression.length());
 							i := completedBracket.start + actionPointerName.length() - fieldAccessAndActionName.length() - 1;
 						} else {
