@@ -144,6 +144,9 @@ event TypeCoercion {
 	}
 }
 
+/**
+ * Wraps the builtin actions so that you can safely call getActionParameters to inspect the type
+ */
 event WrapBuiltinAction {
 	any act;
 	
@@ -264,9 +267,12 @@ event WrapBuiltinAction {
 			case action<string> returns string: {
 				return WrapBuiltinAction(act).stringArgRtnString;
 			}
-			
+
 			case action<string, integer> returns string: {
 				return WrapBuiltinAction(act).stringIntArgsRtnString;
+			}
+			case action<string, string> returns string: {
+				return WrapBuiltinAction(act).stringStringArgsRtnString;
 			}
 			
 			default: {
@@ -393,5 +399,9 @@ event WrapBuiltinAction {
 	
 	action stringIntArgsRtnString(string arg1, integer arg2) returns string {
 		return (<action<string, integer> returns string> act)(arg1, arg2);
+	}
+	
+	action stringStringArgsRtnString(string arg1, string arg2) returns string {
+		return (<action<string, string> returns string> act)(arg1, arg2);
 	}
 }

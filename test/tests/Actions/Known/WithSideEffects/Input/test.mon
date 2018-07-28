@@ -1,0 +1,39 @@
+using utils.TestComplete;
+using utils.TestFailed;
+using utils.TestRunner;
+
+using com.industry.lambdas.Lambda;
+
+event TestEvent {}
+
+monitor Test {  
+	action onload() {
+		dictionary<string, integer> input := {"a": 1, "b": 2};
+		assertEquals(Lambda.function1("x => x.getOrAdd('b', 3)")(input), 2);
+		assertEquals(input, {"a": 1, "b": 2});
+		assertEquals(Lambda.function1("x => x.getOrAdd('c', 3)")(input), 3);
+		assertEquals(input, {"a": 1, "b": 2, "c": 3});
+		
+		dictionary<string, integer> input2 := {"a": 1, "b": 2};
+		assertEquals(Lambda.function1("x => x.getOrAddDefault('b')")(input2), 2);
+		assertEquals(input2, {"a": 1, "b": 2});
+		assertEquals(Lambda.function1("x => x.getOrAddDefault('c')")(input2), 0);
+		assertEquals(input2, {"a": 1, "b": 2, "c": 0});
+
+		dictionary<string, integer> input3 := {"a": 1, "b": 2};
+		assertEquals(Lambda.function1("x => x.add('c', 4)")(input3), new any);
+		assertEquals(input3, {"a": 1, "b": 2, "c": 4});
+		
+		sequence<string> input4 := ["a", "b"];
+		assertEquals(Lambda.function1("x => x.append('c')")(input4), new any);
+		assertEquals(input4, ["a", "b", "c"]);
+		
+		send TestComplete() to "TestResult";
+	}  
+	
+	action assertEquals(any left, any right) {
+		if not TestRunner.equals(left, right) {
+			send TestFailed(left.toString() + " not equal to " + right.toString()) to "TestResult";
+		}
+	}
+}

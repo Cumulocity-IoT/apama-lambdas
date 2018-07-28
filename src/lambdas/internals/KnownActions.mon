@@ -45,32 +45,6 @@ event KnownActions {
 					}
 				}
 			}
-			case float: {
-				switch(argVal) {
-					case integer: {
-						return subject.pow(argVal.toFloat());
-					}
-					case float: {
-						return subject.pow(argVal);
-					}
-					case decimal: {
-						return subject.pow(argVal.toFloat());
-					}
-				}
-			}
-			case decimal: {
-				switch(argVal) {
-					case integer: {
-						return subject.pow(argVal.toDecimal());
-					}
-					case float: {
-						return subject.toFloat().pow(argVal);
-					}
-					case decimal: {
-						return subject.pow(argVal);
-					}
-				}
-			}
 		}
 	}
 	
@@ -82,12 +56,6 @@ event KnownActions {
 			case integer: {
 				return subject.toFloat().sqrt();
 			}
-			case float: {
-				return subject.sqrt();
-			}
-			case decimal: {
-				return subject.sqrt();
-			}
 		}
 	}
 	
@@ -96,14 +64,8 @@ event KnownActions {
 			throw Exception("action \"toFloat\" must have 0 arguments", "IllegalArgumentException");
 		}
 		switch(subject) {
-			case integer: {
-				return subject.toFloat();
-			}
 			case float: {
 				return subject;
-			}
-			case decimal: {
-				return subject.toFloat();
 			}
 		}
 	}
@@ -113,12 +75,6 @@ event KnownActions {
 			throw Exception("action \"toDecimal\" must have 0 arguments", "IllegalArgumentException");
 		}
 		switch(subject) {
-			case integer: {
-				return subject.toDecimal();
-			}
-			case float: {
-				return subject.toDecimal();
-			}
 			case decimal: {
 				return subject;
 			}
@@ -133,12 +89,6 @@ event KnownActions {
 			case integer: {
 				return subject;
 			}
-			case float: {
-				return subject.ceil();
-			}
-			case decimal: {
-				return subject.ceil();
-			}
 		}
 	}
 	
@@ -150,12 +100,6 @@ event KnownActions {
 			case integer: {
 				return subject;
 			}
-			case float: {
-				return subject.floor();
-			}
-			case decimal: {
-				return subject.floor();
-			}
 		}
 	}
 	
@@ -166,12 +110,6 @@ event KnownActions {
 		switch(subject) {
 			case integer: {
 				return subject;
-			}
-			case float: {
-				return subject.round();
-			}
-			case decimal: {
-				return subject.round();
 			}
 		}
 	}

@@ -64,10 +64,10 @@ event ActionHandler {
 	string actionName;
 	sequence<action<> returns any> args;
 	action<any, sequence<any> > returns any knownActionHandler;
+	dictionary<string, dictionary<string, action<any, sequence<any> > returns any > > actionOverridesByType;
 	
 	static action create(action<> returns any subject, string actionName, sequence<action<> returns any> args) returns action<> returns any {		
 		dictionary<string, action<any, sequence<any> > returns any > knownActions := {
-			"pow": KnownActions.pow,
 			"sqrt": KnownActions.sqrt,
 			"toFloat": KnownActions.toFloat,
 			"toDecimal": KnownActions.toDecimal,
@@ -84,10 +84,16 @@ event ActionHandler {
 			"add": KnownActions.add
 		};
 		
+		dictionary<string, dictionary<string, action<any, sequence<any> > returns any > > actionOverridesByType := {
+			"integer": {
+				"pow": KnownActions.pow
+			}
+		};
+		
 		if (knownActions.hasKey(actionName)) {
-			return ActionHandler(subject, actionName, args, knownActions[actionName]).callback;
+			return ActionHandler(subject, actionName, args, knownActions[actionName], actionOverridesByType).callback;
 		} else {
-			return ActionHandler(subject, actionName, args, new action<any, sequence<any> > returns any).callback;
+			return ActionHandler(subject, actionName, args, new action<any, sequence<any> > returns any, actionOverridesByType).callback;
 		}
 	}
 	
@@ -99,16 +105,21 @@ event ActionHandler {
 		}
 		
 		any subjectVal := subject();
+		string subjectType := subjectVal.getTypeName();
 		
 		// Try to get the action from the object, if it doesn't exist then check the known actions
 		any act;
-		try {
-			act := subjectVal.getAction(actionName);
-		} catch(Exception e) {
-			ifpresent knownActionHandler {	
-				return knownActionHandler(subjectVal, argVals);
-			} else {
-				throw Exception("No action " + actionName + " available on " + subjectVal.toString(), "RuntimeException");
+		if actionOverridesByType.hasKey(subjectType) and actionOverridesByType[subjectType].hasKey(actionName) {
+			return actionOverridesByType[subjectType][actionName](subjectVal, argVals);
+		} else {
+			try {
+				act := subjectVal.getAction(actionName);
+			} catch(Exception e) {
+				ifpresent knownActionHandler {	
+					return knownActionHandler(subjectVal, argVals);
+				} else {
+					throw Exception("No action " + actionName + " available on " + subjectVal.toString(), "RuntimeException");
+				}
 			}
 		}
 		

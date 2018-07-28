@@ -73,7 +73,7 @@ event TestRunner {
 		Test("TestResult").complete();
 	}
 	
-	action equals(any left, any right) returns boolean {
+	static action equals(any left, any right) returns boolean {
 		switch (left) {
 			case float: {
 				switch (right) {
