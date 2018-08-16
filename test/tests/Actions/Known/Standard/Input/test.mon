@@ -1,6 +1,8 @@
 using utils.TestRunner;
 
-event TestEvent {}
+event TestEvent {
+	integer value;
+}
 
 monitor Test {  
 	action onload() {
@@ -13,15 +15,6 @@ monitor Test {
 			.addTest("16.sqrt()", new sequence<any>, 4.0, "integer sqrt")
 			.addTest("16.0.sqrt()", new sequence<any>, 4.0, "float sqrt")
 			.addTest("16.0d.sqrt()", new sequence<any>, 4.0d, "double sqrt")
-
-			.addTest("10.abs()", new sequence<any>, 10, "positive integer abs")
-			.addTest("(-10).abs()", new sequence<any>, 10, "negative integer abs")
-			.addTest("10.0.abs()", new sequence<any>, 10.0, "positive float sqrt")
-			.addTest("(-10.0).abs()", new sequence<any>, 10.0, "negative float sqrt")
-			.addTest("10.0d.abs()", new sequence<any>, 10.0d, "positive decimal abs")
-			.addTest("(-10.0d).abs()", new sequence<any>, 10.0d, "negative decimal abs")
-		
-			.addTest("x => x.getTypeName()", [<any>TestEvent()], "TestEvent", "getTypeName")
 		
 			.addTest("16.toFloat()", new sequence<any>, 16.0, "integer toFloat")
 			.addTest("16.0.toFloat()", new sequence<any>, 16.0, "float toFloat")
@@ -45,8 +38,27 @@ monitor Test {
 
 			.addTest("16.toString()", new sequence<any>, "16", "integer toString")
 			.addTest("'Hello'.toString()", new sequence<any>, "Hello", "string toString")
-			.addTest("x => x.toString()", [<any>TestEvent()], "TestEvent()", "getTypeName")
+			.addTest("x => x.toString()", [<any>TestEvent(1)], "TestEvent(1)", "object toString")
 
+			.addTest("x => x.get('b')", [<any>{"a": 1, "b": 2}], 2, "dictionary get")
+			.addTest("x => x.get(1)", [<any>[1,2,3]], 2, "sequence get")
+
+			.addTest("x => x.getOrDefault('b')", [<any>{"a": 1, "b": 2}], 2, "dictionary getOrDefault")
+			.addTest("x => x.getOrDefault('c')", [<any>{"a": 1, "b": 2}], 0, "dictionary getOrDefault non-existing")
+			.addTest("x => x.getOrDefault(TestEvent(1))", [<any>{TestEvent(1): 2}], 2, "dictionary getOrDefault customType")
+			.addTest("x => x.getOrDefault(TestEvent(2))", [<any>{TestEvent(1): 2}], 0, "dictionary getOrDefault customType - non-existing")
+			.addTest("x => x.getOrDefault(1)", [<any>[1,2,3]], 2, "sequence getOrDefault")
+			.addTest("x => x.getOrDefault(3)", [<any>[1,2,3]], 0, "sequence getOrDefault non-existing")
+		
+			.addTest("x => x.getOr('b', 3)", [<any>{"a": 1, "b": 2}], 2, "dictionary getOr")
+			.addTest("x => x.getOr('c', 3)", [<any>{"a": 1, "b": 2}], 3, "dictionary getOr non-existing")
+			.addTest("x => x.getOr(1, 5)", [<any>[1,2,3]], 2, "sequence getOr")
+			.addTest("x => x.getOr(3, 5)", [<any>[1,2,3]], 5, "sequence getOr non-existing")
+
+			.addTest("x => x.hasKey('a')", [<any>{"a": 1, "b": 2}], true, "dictionary hasKey")
+			.addTest("x => x.hasKey('c')", [<any>{"a": 1, "b": 2}], false, "dictionary hasKey")
+			.addTest("x => x.hasKey(123)", [<any>{"a": 1, "b": 2, "123": 3}], true, "dictionary hasKey - type coercion")
+			         
 			.run();
 	}  
 }

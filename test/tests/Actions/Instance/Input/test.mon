@@ -1,0 +1,51 @@
+using utils.TestRunner;
+
+event TestEvent {
+	float val;
+	
+	action multiplyBy10() returns float {
+		return val * 10.0;
+	}
+	
+	action multiplyBy(float val2) returns float {
+		return val * val2;
+	}
+	
+	action multiplyByArgs(float val1, float val2) returns float {
+		return val * val1 * val2;
+	}
+	
+	action multiplyByStringLengthAndFloat(string abc, float val2) returns float {
+		return val * abc.length().toFloat() * val2;
+	}
+	
+	static action create(float value) returns float {
+		return value;
+	}
+	
+	action chainedMultiply(float value) returns TestEvent {
+		return TestEvent(val * value);
+	}
+}
+
+monitor Test {  
+	action onload() {
+		TestRunner.create()
+			.addTest("x => x.toUpper()", [<any> "abc"], "ABC", "primitive, noarg")
+			.addTest("x => x.find('bc')", [<any> "abcde"], 1, "primitive, 1 arg")
+			.addTest("x => x.replace('(!g)(?i)A', 'c')", [<any> "aaabaaa"], "cccbccc", "primitive, 2args same type")
+			.addTest("x => x.findFrom('aaa', 1)", [<any> "aaabaaa"], 4, "primitive, 2 args diff types")
+
+			.addTest("TestEvent(3).multiplyBy10()", new sequence<any>, 30.0, "object, noarg")
+			.addTest("TestEvent(3).multiplyBy(10)", new sequence<any>, 30.0, "object, 1 arg")
+			.addTest("TestEvent(3).multiplyByArgs(2.0, 5)", new sequence<any>, 30.0, "object, 2args same type")
+			.addTest("TestEvent(3).multiplyByStringLengthAndFloat('ab', 5)", new sequence<any>, 30.0, "object, 2 args diff types")
+			.addTest("TestEvent(3).chainedMultiply(2).chainedMultiply(5).multiplyBy(1)", new sequence<any>, 30.0, "object, chained actions")
+		
+			.addTest("TestEvent(3).create(30)", new sequence<any>, 30.0, "object, static actions")
+		
+			.addTest("x => x.getName()", [<any>new TestEvent], "TestEvent", "getTypeName")
+		
+			.run();
+	}
+}

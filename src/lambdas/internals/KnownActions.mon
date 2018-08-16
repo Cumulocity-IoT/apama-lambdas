@@ -21,192 +21,171 @@ package com.industry.lambdas.internals;
 using com.apama.exceptions.Exception;
 
 event KnownActions {
-	static action pow(action<> returns any subject, sequence<action<> returns any> args) returns any {
+	static action pow(any subject, sequence<any> args) returns any {
 		if args.size() != 1 {
 			throw Exception("action \"pow\" must have 1 argument", "IllegalArgumentException");
 		}
-		any argVal := args[0](); 
-		any subjectVal := subject();
+		any argVal := args[0];
 		
-		switch (subjectVal) {
+		switch (subject) {
 			case integer: {
 				switch(argVal) {
 					case integer: {
-						if argVal > 0 {
-							return subjectVal.pow(argVal);
+						if argVal >= 0 {
+							return subject.pow(argVal);
 						} else {
-							return subjectVal.toFloat().pow(argVal.toFloat());
+							return subject.toFloat().pow(argVal.toFloat());
 						}
 					}
 					case float: {
-						return subjectVal.toFloat().pow(argVal);
+						return subject.toFloat().pow(argVal);
 					}
 					case decimal: {
-						return subjectVal.toDecimal().pow(argVal);
-					}
-				}
-			}
-			case float: {
-				switch(argVal) {
-					case integer: {
-						return subjectVal.pow(argVal.toFloat());
-					}
-					case float: {
-						return subjectVal.pow(argVal);
-					}
-					case decimal: {
-						return subjectVal.pow(argVal.toFloat());
-					}
-				}
-			}
-			case decimal: {
-				switch(argVal) {
-					case integer: {
-						return subjectVal.pow(argVal.toDecimal());
-					}
-					case float: {
-						return subjectVal.toFloat().pow(argVal);
-					}
-					case decimal: {
-						return subjectVal.pow(argVal);
+						return subject.toDecimal().pow(argVal);
 					}
 				}
 			}
 		}
 	}
 	
-	static action sqrt(action<> returns any subject, sequence<action<> returns any> args) returns any {
+	static action sqrt(any subject, sequence<any> args) returns any {
 		if args.size() != 0 {
 			throw Exception("action \"sqrt\" must have 0 arguments", "IllegalArgumentException");
 		}
-		any subjectVal := subject();
-		switch (subjectVal) {
+		switch (subject) {
 			case integer: {
-				return subjectVal.toFloat().sqrt();
-			}
-			case float: {
-				return subjectVal.sqrt();
-			}
-			case decimal: {
-				return subjectVal.sqrt();
+				return subject.toFloat().sqrt();
 			}
 		}
 	}
 	
-	static action abs(action<> returns any subject, sequence<action<> returns any> args) returns any {
-		if args.size() != 0 {
-			throw Exception("action \"abs\" must have 0 arguments", "IllegalArgumentException");
-		}
-		any subjectVal := subject();
-		switch (subjectVal) {
-			case integer: {
-				return subjectVal.abs();
-			}
-			case float: {
-				return subjectVal.abs();
-			}
-			case decimal: {
-				return subjectVal.abs();
-			}
-		}
-	}
-	
-	static action getTypeName(action<> returns any subject, sequence<action<> returns any> args) returns any {
-		if args.size() != 0 {
-			throw Exception("action \"getTypeName\" must have 0 arguments", "IllegalArgumentException");
-		}
-		return subject().getTypeName();
-	}
-	
-	static action toFloat(action<> returns any subject, sequence<action<> returns any> args) returns any {
+	static action toFloat(any subject, sequence<any> args) returns any {
 		if args.size() != 0 {
 			throw Exception("action \"toFloat\" must have 0 arguments", "IllegalArgumentException");
 		}
-		switch(subject() as subjectVal) {
-			case integer: {
-				return subjectVal.toFloat();
-			}
+		switch(subject) {
 			case float: {
-				return subjectVal;
-			}
-			case decimal: {
-				return subjectVal.toFloat();
+				return subject;
 			}
 		}
 	}
 	
-	static action toDecimal(action<> returns any subject, sequence<action<> returns any> args) returns any {
+	static action toDecimal(any subject, sequence<any> args) returns any {
 		if args.size() != 0 {
 			throw Exception("action \"toDecimal\" must have 0 arguments", "IllegalArgumentException");
 		}
-		switch(subject() as subjectVal) {
-			case integer: {
-				return subjectVal.toDecimal();
-			}
-			case float: {
-				return subjectVal.toDecimal();
-			}
+		switch(subject) {
 			case decimal: {
-				return subjectVal;
+				return subject;
 			}
 		}
 	}
 	
-	static action ceil(action<> returns any subject, sequence<action<> returns any> args) returns any {
+	static action ceil(any subject, sequence<any> args) returns any {
 		if args.size() != 0 {
 			throw Exception("action \"ceil\" must have 0 arguments", "IllegalArgumentException");
 		}
-		switch(subject() as subjectVal) {
+		switch(subject) {
 			case integer: {
-				return subjectVal;
-			}
-			case float: {
-				return subjectVal.ceil();
-			}
-			case decimal: {
-				return subjectVal.ceil();
+				return subject;
 			}
 		}
 	}
 	
-	static action floor(action<> returns any subject, sequence<action<> returns any> args) returns any {
+	static action floor(any subject, sequence<any> args) returns any {
 		if args.size() != 0 {
 			throw Exception("action \"floor\" must have 0 arguments", "IllegalArgumentException");
 		}
-		switch(subject() as subjectVal) {
+		switch(subject) {
 			case integer: {
-				return subjectVal;
-			}
-			case float: {
-				return subjectVal.floor();
-			}
-			case decimal: {
-				return subjectVal.floor();
+				return subject;
 			}
 		}
 	}
 	
-	static action round(action<> returns any subject, sequence<action<> returns any> args) returns any {
+	static action round(any subject, sequence<any> args) returns any {
 		if args.size() != 0 {
 			throw Exception("action \"round\" must have 0 arguments", "IllegalArgumentException");
 		}
-		switch(subject() as subjectVal) {
+		switch(subject) {
 			case integer: {
-				return subjectVal;
-			}
-			case float: {
-				return subjectVal.round();
-			}
-			case decimal: {
-				return subjectVal.round();
+				return subject;
 			}
 		}
 	}
 	
-	static action toString_(action<> returns any subject, sequence<action<> returns any> args) returns any {
-		if args.size() != 0 {
-			throw Exception("action \"toString\" must have 0 arguments", "IllegalArgumentException");
+	static action get(any subject, sequence<any> args) returns any {
+		if args.size() != 1 {
+			throw Exception("action \"get\" must have 1 argument", "IllegalArgumentException");
 		}
-		return subject().valueToString();
+		string typeName := subject.getTypeName();
+		if typeName.find("dictionary<") = 0 {
+			return subject.getEntry(TypeCoercion.coerceValue(args[0], Types.getDictionaryKeyType(subject)));
+		} else if typeName.find("sequence<") = 0 {
+			return subject.getEntry(TypeCoercion.coerceValue(args[0], "integer"));
+		} else {
+			throw Exception("Can't call get on " + subject.toString(), "RuntimeException");
+		}
+	}
+	
+	static action getOrDefault(any subject, sequence<any> args) returns any {
+		if args.size() != 1 {
+			throw Exception("action \"getOrDefault\" must have 1 argument", "IllegalArgumentException");
+		}
+		string typeName := subject.getTypeName();
+		if typeName.find("dictionary<") = 0 {
+			return subject.getAction("getOrDefault").getGenericAction()([TypeCoercion.coerceValue(args[0], Types.getDictionaryKeyType(subject))]);
+		} else if typeName.find("sequence<") = 0 {
+			try {
+				return subject.getEntry(TypeCoercion.coerceValue(args[0], "integer"));
+			} catch(Exception e) {
+				return any.newInstance(Types.getSequenceValueType(subject));
+			}
+		} else {
+			throw Exception("Can't call getOrDefault on " + subject.toString(), "RuntimeException");
+		}
+	}
+	
+	static action getOr(any subject, sequence<any> args) returns any {
+		if args.size() != 2 {
+			throw Exception("action \"getOr\" must have 2 arguments", "IllegalArgumentException");
+		}
+		string typeName := subject.getTypeName();
+		if typeName.find("dictionary<") = 0 {
+			return subject.getAction("getOr").getGenericAction()([TypeCoercion.coerceValue(args[0], Types.getDictionaryKeyType(subject)), TypeCoercion.coerceValue(args[1], Types.getDictionaryValueType(subject))]);
+		} else if typeName.find("sequence<") = 0 {
+			try {
+				return subject.getEntry(TypeCoercion.coerceValue(args[0], "integer"));
+			} catch(Exception e) {
+				return TypeCoercion.coerceValue(args[1], Types.getSequenceValueType(subject));
+			}
+		} else {
+			throw Exception("Can't call getOr on " + subject.toString(), "RuntimeException");
+		}
+	}
+	
+	static action getOrAdd(any subject, sequence<any> args) returns any {
+		if args.size() != 2 {
+			throw Exception("action \"getOrAdd\" must have 2 arguments", "IllegalArgumentException");
+		}
+		string typeName := subject.getTypeName();
+		if typeName.find("dictionary<") = 0 {
+			return subject.getAction("getOrAdd").getGenericAction()([TypeCoercion.coerceValue(args[0], Types.getDictionaryKeyType(subject)), TypeCoercion.coerceValue(args[1], Types.getDictionaryValueType(subject))]);
+		} else {
+			throw Exception("Can't call getOrAdd on " + subject.toString(), "RuntimeException");
+		}
+	}
+	
+	static action add(any subject, sequence<any> args) returns any {
+		if args.size() != 2 {
+			throw Exception("action \"add\" must have 2 arguments", "IllegalArgumentException");
+		}
+		string typeName := subject.getTypeName();
+		if typeName.find("dictionary<") = 0 {
+			subject.setEntry(TypeCoercion.coerceValue(args[0], Types.getDictionaryKeyType(subject)), TypeCoercion.coerceValue(args[1], Types.getDictionaryValueType(subject)));
+			return new any;
+		} else {
+			throw Exception("Can't call add on " + subject.toString(), "RuntimeException");
+		}
 	}
 }

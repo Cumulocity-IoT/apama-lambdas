@@ -20,6 +20,25 @@ package com.industry.lambdas.internals;
 
 using com.apama.exceptions.Exception;
 
+event Types {
+	static action getSequenceValueTypeFromString(string sequenceType) returns string {
+		return sequenceType.substring("sequence<".length(), sequenceType.length() - 1);
+	}
+	
+	static action getSequenceValueType(any seq) returns string {
+		string sequenceType := seq.getTypeName();
+		return getSequenceValueTypeFromString(sequenceType);
+	}
+	
+	static action getDictionaryKeyType(any dict) returns string {
+		return getSequenceValueTypeFromString(dict.getAction("keys").getActionReturnTypeName());
+	}
+	
+	static action getDictionaryValueType(any dict) returns string {
+		return getSequenceValueTypeFromString(dict.getAction("values").getActionReturnTypeName());
+	}
+}
+
 event PredicateFromFunction {
 	action<any> returns any function;
 	
@@ -122,5 +141,267 @@ event TypeCoercion {
 			return value.valueToString();
 		}
 		return value;
+	}
+}
+
+/**
+ * Wraps the builtin actions so that you can safely call getActionParameters to inspect the type
+ */
+event WrapBuiltinAction {
+	any act;
+	
+	static action create(any act) returns any {
+		switch(act) {
+			case action<>: {
+				return WrapBuiltinAction(act).noArgNoRtn;
+			}
+			
+			case action<> returns integer: {
+				return WrapBuiltinAction(act).noArgRtnInt;
+			}
+			case action<> returns float: {
+				return WrapBuiltinAction(act).noArgRtnFloat;
+			}
+			case action<> returns decimal: {
+				return WrapBuiltinAction(act).noArgRtnDecimal;
+			}
+			case action<> returns boolean: {
+				return WrapBuiltinAction(act).noArgRtnBool;
+			}
+			case action<> returns string: {
+				return WrapBuiltinAction(act).noArgRtnString;
+			}
+			
+			case action<integer>: {
+				return WrapBuiltinAction(act).intArgNoRtn;
+			}
+			case action<float>: {
+				return WrapBuiltinAction(act).floatArgNoRtn;
+			}
+			case action<decimal>: {
+				return WrapBuiltinAction(act).decimalArgNoRtn;
+			}
+			case action<boolean>: {
+				return WrapBuiltinAction(act).boolArgNoRtn;
+			}
+			case action<string>: {
+				return WrapBuiltinAction(act).stringArgNoRtn;
+			}
+			
+			case action<integer> returns integer: {
+				return WrapBuiltinAction(act).intArgRtnInt;
+			}
+			case action<float> returns integer: {
+				return WrapBuiltinAction(act).floatArgRtnInt;
+			}
+			case action<decimal> returns integer: {
+				return WrapBuiltinAction(act).decimalArgRtnInt;
+			}
+			case action<boolean> returns integer: {
+				return WrapBuiltinAction(act).boolArgRtnInt;
+			}
+			case action<string> returns integer: {
+				return WrapBuiltinAction(act).stringArgRtnInt;
+			}
+			
+			case action<integer> returns float: {
+				return WrapBuiltinAction(act).intArgRtnFloat;
+			}
+			case action<float> returns float: {
+				return WrapBuiltinAction(act).floatArgRtnFloat;
+			}
+			case action<decimal> returns float: {
+				return WrapBuiltinAction(act).decimalArgRtnFloat;
+			}
+			case action<boolean> returns float: {
+				return WrapBuiltinAction(act).boolArgRtnFloat;
+			}
+			case action<string> returns float: {
+				return WrapBuiltinAction(act).stringArgRtnFloat;
+			}
+			
+			case action<integer> returns decimal: {
+				return WrapBuiltinAction(act).intArgRtnDecimal;
+			}
+			case action<float> returns decimal: {
+				return WrapBuiltinAction(act).floatArgRtnDecimal;
+			}
+			case action<decimal> returns decimal: {
+				return WrapBuiltinAction(act).decimalArgRtnDecimal;
+			}
+			case action<boolean> returns decimal: {
+				return WrapBuiltinAction(act).boolArgRtnDecimal;
+			}
+			case action<string> returns decimal: {
+				return WrapBuiltinAction(act).stringArgRtnDecimal;
+			}
+			
+			case action<integer> returns boolean: {
+				return WrapBuiltinAction(act).intArgRtnBool;
+			}
+			case action<float> returns boolean: {
+				return WrapBuiltinAction(act).floatArgRtnBool;
+			}
+			case action<decimal> returns boolean: {
+				return WrapBuiltinAction(act).decimalArgRtnBool;
+			}
+			case action<boolean> returns boolean: {
+				return WrapBuiltinAction(act).boolArgRtnBool;
+			}
+			case action<string> returns boolean: {
+				return WrapBuiltinAction(act).stringArgRtnBool;
+			}
+			
+			case action<integer> returns string: {
+				return WrapBuiltinAction(act).intArgRtnString;
+			}
+			case action<float> returns string: {
+				return WrapBuiltinAction(act).floatArgRtnString;
+			}
+			case action<decimal> returns string: {
+				return WrapBuiltinAction(act).decimalArgRtnString;
+			}
+			case action<boolean> returns string: {
+				return WrapBuiltinAction(act).boolArgRtnString;
+			}
+			case action<string> returns string: {
+				return WrapBuiltinAction(act).stringArgRtnString;
+			}
+
+			case action<string, integer> returns string: {
+				return WrapBuiltinAction(act).stringIntArgsRtnString;
+			}
+			case action<string, string> returns string: {
+				return WrapBuiltinAction(act).stringStringArgsRtnString;
+			}
+			
+			default: {
+				return act;
+			}
+		}
+	}
+	
+	action noArgNoRtn() {
+		(<action<> > act)();
+	}
+	
+	action noArgRtnInt() returns integer {
+		return (<action<> returns integer> act)();
+	}
+	action noArgRtnFloat() returns float {
+		return (<action<> returns float> act)();
+	}
+	action noArgRtnDecimal() returns decimal {
+		return (<action<> returns decimal> act)();
+	}
+	action noArgRtnBool() returns boolean {
+		return (<action<> returns boolean> act)();
+	}
+	action noArgRtnString() returns string {
+		return (<action<> returns string> act)();
+	}
+	
+	action intArgNoRtn(integer arg) {
+		(<action<integer> > act)(arg);
+	}
+	action floatArgNoRtn(float arg) {
+		(<action<float> > act)(arg);
+	}
+	action decimalArgNoRtn(decimal arg) {
+		(<action<decimal> > act)(arg);
+	}
+	action boolArgNoRtn(boolean arg) {
+		(<action<boolean> > act)(arg);
+	}
+	action stringArgNoRtn(string arg) {
+		(<action<string> > act)(arg);
+	}
+	
+	action intArgRtnInt(integer arg) returns integer {
+		return (<action<integer> returns integer> act)(arg);
+	}
+	action floatArgRtnInt(float arg) returns integer {
+		return (<action<float> returns integer> act)(arg);
+	}
+	action decimalArgRtnInt(decimal arg) returns integer {
+		return (<action<decimal> returns integer> act)(arg);
+	}
+	action boolArgRtnInt(boolean arg) returns integer {
+		return (<action<boolean> returns integer> act)(arg);
+	}
+	action stringArgRtnInt(string arg) returns integer {
+		return (<action<string> returns integer> act)(arg);
+	}
+	
+	action intArgRtnFloat(integer arg) returns float {
+		return (<action<integer> returns float> act)(arg);
+	}
+	action floatArgRtnFloat(float arg) returns float {
+		return (<action<float> returns float> act)(arg);
+	}
+	action decimalArgRtnFloat(decimal arg) returns float {
+		return (<action<decimal> returns float> act)(arg);
+	}
+	action boolArgRtnFloat(boolean arg) returns float {
+		return (<action<boolean> returns float> act)(arg);
+	}
+	action stringArgRtnFloat(string arg) returns float {
+		return (<action<string> returns float> act)(arg);
+	}
+	
+	action intArgRtnDecimal(integer arg) returns decimal {
+		return (<action<integer> returns decimal> act)(arg);
+	}
+	action floatArgRtnDecimal(float arg) returns decimal {
+		return (<action<float> returns decimal> act)(arg);
+	}
+	action decimalArgRtnDecimal(decimal arg) returns decimal {
+		return (<action<decimal> returns decimal> act)(arg);
+	}
+	action boolArgRtnDecimal(boolean arg) returns decimal {
+		return (<action<boolean> returns decimal> act)(arg);
+	}
+	action stringArgRtnDecimal(string arg) returns decimal {
+		return (<action<string> returns decimal> act)(arg);
+	}
+	
+	action intArgRtnBool(integer arg) returns boolean {
+		return (<action<integer> returns boolean> act)(arg);
+	}
+	action floatArgRtnBool(float arg) returns boolean {
+		return (<action<float> returns boolean> act)(arg);
+	}
+	action decimalArgRtnBool(decimal arg) returns boolean {
+		return (<action<decimal> returns boolean> act)(arg);
+	}
+	action boolArgRtnBool(boolean arg) returns boolean {
+		return (<action<boolean> returns boolean> act)(arg);
+	}
+	action stringArgRtnBool(string arg) returns boolean {
+		return (<action<string> returns boolean> act)(arg);
+	}
+	
+	action intArgRtnString(integer arg) returns string {
+		return (<action<integer> returns string> act)(arg);
+	}
+	action floatArgRtnString(float arg) returns string {
+		return (<action<float> returns string> act)(arg);
+	}
+	action decimalArgRtnString(decimal arg) returns string {
+		return (<action<decimal> returns string> act)(arg);
+	}
+	action boolArgRtnString(boolean arg) returns string {
+		return (<action<boolean> returns string> act)(arg);
+	}
+	action stringArgRtnString(string arg) returns string {
+		return (<action<string> returns string> act)(arg);
+	}
+	
+	action stringIntArgsRtnString(string arg1, integer arg2) returns string {
+		return (<action<string, integer> returns string> act)(arg1, arg2);
+	}
+	
+	action stringStringArgsRtnString(string arg1, string arg2) returns string {
+		return (<action<string, string> returns string> act)(arg1, arg2);
 	}
 }
