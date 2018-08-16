@@ -28,6 +28,11 @@ monitor Test {
 		assertEquals(Lambda.function1("x => x.append('c')")(input4), new any);
 		assertEquals(input4, ["a", "b", "c"]);
 		
+		// Check type coercion
+		sequence<float> input5 := [1.0, 2.0];
+		assertEquals(Lambda.function1("x => x.append(3)")(input5), new any);
+		assertEquals(input5, [1.0, 2.0, 3.0]);
+		
 		send TestComplete() to "TestResult";
 	}  
 	

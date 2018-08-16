@@ -78,9 +78,6 @@ event ActionHandler {
 			"getOr": KnownActions.getOr,
 			"getOrDefault": KnownActions.getOrDefault,
 			"getOrAdd": KnownActions.getOrAdd,
-			"getOrAddDefault": KnownActions.getOrAddDefault,
-			"hasKey": KnownActions.hasKey,
-			"append": KnownActions.append,
 			"add": KnownActions.add
 		};
 		
@@ -123,6 +120,7 @@ event ActionHandler {
 			}
 		}
 		
+		// Note: If this section proves to be slow, consider manually/automatically re-ordering this section (maybe so that wrapping is always done) 
 		dictionary<string, string> paramTypes;
 		try {
 			paramTypes := act.getActionParameters();

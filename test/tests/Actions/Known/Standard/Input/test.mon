@@ -1,6 +1,8 @@
 using utils.TestRunner;
 
-event TestEvent {}
+event TestEvent {
+	integer value;
+}
 
 monitor Test {  
 	action onload() {
@@ -36,13 +38,15 @@ monitor Test {
 
 			.addTest("16.toString()", new sequence<any>, "16", "integer toString")
 			.addTest("'Hello'.toString()", new sequence<any>, "Hello", "string toString")
-			.addTest("x => x.toString()", [<any>TestEvent()], "TestEvent()", "object toString")
+			.addTest("x => x.toString()", [<any>TestEvent(1)], "TestEvent(1)", "object toString")
 
 			.addTest("x => x.get('b')", [<any>{"a": 1, "b": 2}], 2, "dictionary get")
 			.addTest("x => x.get(1)", [<any>[1,2,3]], 2, "sequence get")
 
 			.addTest("x => x.getOrDefault('b')", [<any>{"a": 1, "b": 2}], 2, "dictionary getOrDefault")
 			.addTest("x => x.getOrDefault('c')", [<any>{"a": 1, "b": 2}], 0, "dictionary getOrDefault non-existing")
+			.addTest("x => x.getOrDefault(TestEvent(1))", [<any>{TestEvent(1): 2}], 2, "dictionary getOrDefault customType")
+			.addTest("x => x.getOrDefault(TestEvent(2))", [<any>{TestEvent(1): 2}], 0, "dictionary getOrDefault customType - non-existing")
 			.addTest("x => x.getOrDefault(1)", [<any>[1,2,3]], 2, "sequence getOrDefault")
 			.addTest("x => x.getOrDefault(3)", [<any>[1,2,3]], 0, "sequence getOrDefault non-existing")
 		
@@ -53,6 +57,7 @@ monitor Test {
 
 			.addTest("x => x.hasKey('a')", [<any>{"a": 1, "b": 2}], true, "dictionary hasKey")
 			.addTest("x => x.hasKey('c')", [<any>{"a": 1, "b": 2}], false, "dictionary hasKey")
+			.addTest("x => x.hasKey(123)", [<any>{"a": 1, "b": 2, "123": 3}], true, "dictionary hasKey - type coercion")
 			         
 			.run();
 	}  

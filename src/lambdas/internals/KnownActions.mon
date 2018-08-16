@@ -176,18 +176,6 @@ event KnownActions {
 		}
 	}
 	
-	static action getOrAddDefault(any subject, sequence<any> args) returns any {
-		if args.size() != 1 {
-			throw Exception("action \"getOrAddDefault\" must have 1 argument", "IllegalArgumentException");
-		}
-		string typeName := subject.getTypeName();
-		if typeName.find("dictionary<") = 0 {
-			return subject.getAction("getOrAddDefault").getGenericAction()([TypeCoercion.coerceValue(args[0], Types.getDictionaryKeyType(subject))]);
-		} else {
-			throw Exception("Can't call getOrAddDefault on " + subject.toString(), "RuntimeException");
-		}
-	}
-	
 	static action add(any subject, sequence<any> args) returns any {
 		if args.size() != 2 {
 			throw Exception("action \"add\" must have 2 arguments", "IllegalArgumentException");
@@ -198,30 +186,6 @@ event KnownActions {
 			return new any;
 		} else {
 			throw Exception("Can't call add on " + subject.toString(), "RuntimeException");
-		}
-	}
-	
-	static action append(any subject, sequence<any> args) returns any {
-		if args.size() != 1 {
-			throw Exception("action \"append\" must have 1 argument", "IllegalArgumentException");
-		}
-		string typeName := subject.getTypeName();
-		if typeName.find("sequence<") = 0 {
-			return subject.getAction("append").getGenericAction()([TypeCoercion.coerceValue(args[0], Types.getSequenceValueType(subject))]);
-		} else {
-			throw Exception("Can't call append on " + subject.toString(), "RuntimeException");
-		}
-	}
-	
-	static action hasKey(any subject, sequence<any> args) returns any {
-		if args.size() != 1 {
-			throw Exception("action \"hasKey\" must have 1 argument", "IllegalArgumentException");
-		}
-		string typeName := subject.getTypeName();
-		if typeName.find("dictionary<") = 0 {
-			return subject.getAction("hasKey").getGenericAction()([TypeCoercion.coerceValue(args[0], Types.getDictionaryKeyType(subject))]);
-		} else {
-			throw Exception("Can't call hasKey on " + subject.toString(), "RuntimeException");
 		}
 	}
 }
