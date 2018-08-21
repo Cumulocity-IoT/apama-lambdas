@@ -1,0 +1,31 @@
+package abc;
+
+using utils.TestRunner;
+
+event TestEvent {
+	float val;
+	
+	static action staticAction0() returns float {
+		return 5.0;
+	}
+	
+	static action staticAction1(float value) returns float {
+		return value * 5.0;
+	}
+}
+
+monitor Test {  
+	action onload() {
+		TestRunner.create()
+			.addTest("abc.TestEvent.staticAction0()", new sequence<any>, 5.0, "zero arg static action")
+			.addTest("abc.TestEvent.staticAction1(5.0)", new sequence<any>, 25.0, "one arg static action")
+			.addTest("abc.TestEvent.staticAction1(5 - 2.0 * 1.0d)", new sequence<any>, 15.0, "one arg static action, complex arg")
+			
+			.addTest("abc.TestEvent.canParse('abc.TestEvent(5.0)')", new sequence<any>, true, "built-in static action")
+		
+			// This already worked - but it's nice to test
+			.addTest("abc.TestEvent(15).staticAction1(5.0)", new sequence<any>, 25.0, "one arg static action on constructed event")
+		
+			.run();
+	}
+}
