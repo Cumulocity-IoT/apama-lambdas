@@ -508,11 +508,20 @@ event ExpressionCompiler {
 						string fieldAccessAndActionName := firstMatch(beforeBracket, "(\\.|\\$|\\w)+$").getOrThrow();
 						
 						ifpresent firstMatch(fieldAccessAndActionName, "\\.(\\$|\\w)+$") as actionNameAndDot {
-							// We've possibly got a named action call
+							// We've got an action call on an object, or a static action
 							string actionName := actionNameAndDot.substring(".".length(), actionNameAndDot.length());
 							string fieldAccess := fieldAccessAndActionName.substring(0, fieldAccessAndActionName.length() - actionName.length() - ".".length());
 							
-							action<> returns any subject := ExpressionCompiler.create(fieldAccess, closureGetters).compile();
+							action<> returns any subject;
+							try {
+								// Is it a static action?
+								any eventWithStaticMethod := any.newInstance(fieldAccess);
+								// Yes it was (it would throw otherwise)
+								subject := ValueGetter.create(eventWithStaticMethod);
+							} catch(Exception e) {
+								// Not a static action - just a normal action (might be on objects inside a dictionary eg: abc.xyx.action on {"xyz": {"action": someAction})
+								subject := ExpressionCompiler.create(fieldAccess, closureGetters).compile();
+							}
 							
 							sequence<action<> returns any> args := new sequence<action<> returns any>;
 							if not innerExpression.matches("\\s*") {
