@@ -1,3 +1,4 @@
+
 <!--- 
 Copyright 2018 Software AG
 
@@ -97,49 +98,49 @@ action<sequence<any> > returns any ex3 := Lambda.function("x, y, z => x + y / z"
 ```javascript
 action<any> returns boolean ex := Lambda.predicate("x => x >= 10 and x < 20");
 ```
-**Call (Awaiting Apama 10.2)** - Run a lambda just for side-effects (Not yet possible)
+**Call** - Run a lambda just for side-effects
 ```javascript
 action<any> ex := Lambda.call("x => x.doSomething(10 + 3)");
 ```
 ## <a id="language"></a>Language Features
 Lambdas attempt to provide a language very close to EPL but without the need for casting. You will never have to write  `<sequence<float, boolean> >` within a lambda!
 
-**Numbers**
+**Numbers**<br/>
 All numbers are treated the same and can be operated on without conversion. 
 ```javascript
 Lambda.function1("x => x + 10 + 11.1 + 22.2d")(1.1) = <any> 44.4
 ```
 This follows the rules of [coercion](#coercion).
 
-**Strings**
+**Strings**<br/>
 Strings can be defined with either `\"` or `'`. Generally `'` is easier because there is no need for the backslash escape character.
 ```javascript
 Lambda.function1("x => \"hello\" + 'world'")
 ```
 
-**Brackets**
+**Brackets**<br/>
 The usual bracketing syntax applies
 ```javascript
 Lambda.function1("x => (x + 5) / 12")
 ```
 
-**Numeric Operators**
+**Numeric Operators**<br/>
 All of the usual epl operators (`%`, `/`, `*`, `-`, `+`).
 _Note: Type [coercion](#coercion) may happen._
 
-**Logical Operators**
+**Logical Operators**<br/>
 All of the usual epl operators (`=`, `!=`, `>=`, `>`, `<=`, `<`, `and`, `xor`, `or`,`not`). 
 _Note: Type [coercion](#coercion) may happen._
 
 Some non-epl operators:
 `!` - Same as `not`
 
-**Ternary Operator**
+**Ternary Operator**<br/>
 ```javascript
 Lambda.function1("x => x > 10 ? 'Big' : 'Small'")
 ```
 
-**Field, Dictionary, and Sequence Access**
+**Field, Dictionary, and Sequence Access**<br/>
 ```javascript
 Lambda.function1("event0 => event0.fieldName")
 // or
@@ -153,10 +154,10 @@ Lambda.function1("dict => dict.key")
 ```javascript
 Lambda.function1("seq0 => seq0[0]")
 ```
-**Special Values**
+**Special Values**<br/>
 `currentTime` - The same as in EPL - Gets the current time in seconds (usually rounded to nearest 100ms) 
 
-**Event Construction**
+**Event Construction**<br/>
 Events can be constructed in the standard epl form:
 ```javascript
 Lambda.function1("x => com.example.MyFirstEvent(x, x)")
@@ -164,38 +165,41 @@ Lambda.function1("x => com.example.MyFirstEvent(x, x)")
 Event names **must be fully qualified** (regardless of any `using` statements)
 Where possible automatic [coercion](#coercion) will occur for all fields.
 
-**Action Calling**
-Calling actions in a generic way is not possible in Apama 10.1, so only a handful of particularly useful actions are supported. This will improve in 10.2.
+**Action Calling**<br/>
+Actions can be called on events as usual in EPL. Static actions are supported on events, but not on primitive or other reference types.
+```javascript
+Lambda.function1("x => x.round()")(10.2) = 10
+```
+There are also some additional utility actions added to some types:
 
-|Action          |Description                                                   |
-|---------------:|--------------------------------------------------------------|
-|   `.toString()`|Call on any type to convert it to a string (has no effect on strings)|
-|    `.toFloat()`|Call on any numeric type to convert to float                  |
-|  `.toDecimal()`|Call on any numeric type to convert to decimal                |
-|      `.round()`|Call on any numeric type to round to an integer               |
-|       `.ceil()`|Call on any numeric type to round upwards to an integer       |
-|      `.floor()`|Call on any numeric type to round downwards to an integer     |
-|        `.abs()`|Call on any numeric type to provide the non-negative value    |
-|       `.pow(n)`|Call on any numeric type to raise it to the `n`^th^ power     |
-|       `.sqrt()`|Call on any numeric type to square root the value             |
-|`.getTypeName()`|Call on any type to get its type name as a string             |
+|Type|Action|Description|
+|-|-:|-|
+|float|`.toFloat()`|Convert to float|
+|decimal|`.toDecimal()`|Convert to decimal|
+|integer|`.sqrt()`| Calculate the square root|
+|integer|`.round()`|Round to an integer|
+|integer|`.ceil()`|Round upwards to an integer|
+|integer|`.floor()`|Round downwards to an integer|
+|sequence|`.get(i)`|Get the value at index `i`|
+|sequence|`.getOr(i, alt)`|Get the value at index `i` or an alternative value if it does not exist|
+|sequence|`.getOrDefault(i)`|Get the value at index `i` or a default value if it does not exist|
 
-**Sequence Literals**
+**Sequence Literals**<br/>
 Sequences can be constructed in lambdas in much the same way that they can in EPL, except that they are always `sequence<any>`.
 ```javascript
 Lambda.function1("x => [x, x + 1, x + 2]")(0) = [<any>0, 1, 2]
 ```
-**Spread Operator**
+**Spread Operator**<br/>
 The spread operator expands a sequence inside another sequence:
 ```javascript
 Lambda.function1("x => [...x, 3, 4, 5]")([0, 1, 2]) = [<any>0, 1, 2, 3, 4, 5]
 ```
-**Array Destructuring**
+**Array Destructuring**<br/>
 When using lambdas (particularly with Observables) you may find that a lambda is provided with a sequence as the argument. Rather than accessing each value using `seq[index]` it is easier to assign a name to each item in the sequence:
 ```javascript
 Lambda.function1("[sum, count] => sum / count")([56, 7]) = <any> 8.0
 ```
-<a id="coercion"></a>**Type Coercion**
+<a id="coercion"></a>**Type Coercion**<br/>
 Numbers and sometimes values are coerced to sensible types, using the following rules:
 * Operations on two values of the same type _mostly_ result in the same type
 * Operations on `integers` which may result in fractions result in `floats`
