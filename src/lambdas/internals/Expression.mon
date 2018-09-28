@@ -104,7 +104,7 @@ event ActionHandler {
 		any subjectVal := subject();
 		string subjectType := subjectVal.getTypeName();
 		
-		// Try to get the action from the object, if it doesn't exist then check the known actions
+		// Try to get the action from the object, if it doesn't exist then check the fields and then the known actions
 		any act;
 		if actionOverridesByType.hasKey(subjectType) and actionOverridesByType[subjectType].hasKey(actionName) {
 			return actionOverridesByType[subjectType][actionName](subjectVal, argVals);
@@ -112,10 +112,14 @@ event ActionHandler {
 			try {
 				act := subjectVal.getAction(actionName);
 			} catch(Exception e) {
-				ifpresent knownActionHandler {	
-					return knownActionHandler(subjectVal, argVals);
-				} else {
-					throw Exception("No action " + actionName + " available on " + subjectVal.toString(), "RuntimeException");
+				try {
+					act := subjectVal.getField(actionName);
+				} catch(Exception e) {
+					ifpresent knownActionHandler {	
+						return knownActionHandler(subjectVal, argVals);
+					} else {
+						throw Exception("No action " + actionName + " available on " + subjectVal.toString(), "RuntimeException");
+					}
 				}
 			}
 		}
