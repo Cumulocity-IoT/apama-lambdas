@@ -126,8 +126,11 @@ monitor Test {
 	
 			.addTest("true or false", new sequence<any>, true, "or true")
 			.addTest("false or false", new sequence<any>, false, "or false")
-		
+
 			.addTest("!false and not false and 1 = 1 and 5 > 3 xor 2 < 9 or 5 > 3", new sequence<any>, true, "Simple Operator Precedence")
+
+			.addTest("!(false)and(not(false))and(1=1)and(5>3)xor(2<9)or(5>3)", new sequence<any>, true, "No Spaces between operator")
+			.addTest("[true][0]or(false)", new sequence<any>, true, "No spaces and field access")
 		
 			.run();
 	}  
