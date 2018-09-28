@@ -539,28 +539,52 @@ event ExpressionCompiler {
 						} else {
 							// This is an action directly from the closure
 							string actionName := fieldAccessAndActionName;
-
-							sequence<action<> returns any> args := new sequence<action<> returns any>;
-							if not innerExpression.matches("\\s*") {
-								sequence<string> argStrings := ",".split(innerExpression); // safe to split because all other commas will have been removed
-								string arg;
-								for arg in argStrings {
-									args.append(ExpressionCompiler.create(arg, closureGetters).compile());
-								}
-							}
 							
-							string actionPointerName := "$_" + integer.getUnique().toString();
-							closureGetters.add(actionPointerName, ClosureActionHandler.create(closureGetters, actionName, args));
-							expression := expression.substring(0, completedBracket.start - fieldAccessAndActionName.length()) + actionPointerName + expression.substring(i + 1, expression.length());
-							i := completedBracket.start + actionPointerName.length() - fieldAccessAndActionName.length() - 1;
+							if closureGetters.hasKey(actionName) {
+								sequence<action<> returns any> args := new sequence<action<> returns any>;
+								if not innerExpression.matches("\\s*") {
+									sequence<string> argStrings := ",".split(innerExpression); // safe to split because all other commas will have been removed
+									string arg;
+									for arg in argStrings {
+										args.append(ExpressionCompiler.create(arg, closureGetters).compile());
+									}
+								}
+								
+								string actionPointerName := "$_" + integer.getUnique().toString();
+								closureGetters.add(actionPointerName, ClosureActionHandler.create(closureGetters, actionName, args));
+								expression := expression.substring(0, completedBracket.start - fieldAccessAndActionName.length()) + actionPointerName + expression.substring(i + 1, expression.length());
+								i := completedBracket.start + actionPointerName.length() - fieldAccessAndActionName.length() - 1;
+							
+							} else { // If it's not something we can get from the closure then we assume the actionName is actually an operator (handled later), the brackets are just for precedence
+								string actionPointerName := "$_" + integer.getUnique().toString();
+								closureGetters.add(actionPointerName, ExpressionCompiler.create(innerExpression, closureGetters).compile());
+								
+								// Might have an operator (or, and, xor, not) directly after brackets so we space them out, but we want to avoid spacing if its an action call or field access
+								string extraSpace := "";
+								string characterAfterBracket := expression.substring(i + 1,integer.min(i + 2, expression.length()));
+								if characterAfterBracket.matches("(\\w|\\$)") {
+									extraSpace := " ";
+								}
+								
+								expression := expression.substring(0, completedBracket.start) + " " + actionPointerName + extraSpace + expression.substring(i + 1, expression.length()); // We add in a space to separate the possible operator from the actionPointerName
+								i := completedBracket.start + actionPointerName.length() + " ".length() + extraSpace.length() - 1;
+							}
 						}
 					}
 				} else {
 					string innerExpression := expression.substring(completedBracket.start + 1, i);
 					string innerPointerName := "$_" + integer.getUnique().toString();
 					closureGetters.add(innerPointerName, ExpressionCompiler.create(innerExpression, closureGetters).compile());
-					expression := expression.substring(0, completedBracket.start) + innerPointerName + expression.substring(i + 1, expression.length());
-					i := completedBracket.start + innerPointerName.length() - 1;
+					
+					// Might have an operator (or, and, xor, not) directly after brackets so we space them out, but we want to avoid spacing if its an action call or field access
+					string extraSpace := "";
+					string characterAfterBracket := expression.substring(i + 1,integer.min(i + 2, expression.length()));
+					if characterAfterBracket.matches("(\\w|\\$)") {
+						extraSpace := " ";
+					}
+					
+					expression := expression.substring(0, completedBracket.start) + innerPointerName + extraSpace + expression.substring(i + 1, expression.length());
+					i := completedBracket.start + innerPointerName.length() - 1 + extraSpace.length();
 				}
 				brackets.remove(brackets.size() - 1);
 			} else if currentCharacter.matches("\\$|\\w") {
@@ -600,8 +624,16 @@ event ExpressionCompiler {
 							string fieldKeyExp := expression.substring(i + 1, j);
 							string actionPointerName := "$_" + integer.getUnique().toString();
 							closureGetters.add(actionPointerName, FieldAccess.create(closureGetters, objectName, ExpressionCompiler.create(fieldKeyExp, closureGetters).compile()));
-							expression := expression.substring(0, i - objectName.length()) + actionPointerName + expression.substring(j + 1, expression.length());
-							i := i - objectName.length() + actionPointerName.length() - 1;
+							
+							// Might have an operator (or, and, xor, not) directly after brackets so we space them out, but we want to avoid spacing if its an action call or field access
+							string extraSpace := "";
+							string characterAfterBracket := expression.substring(j + 1,integer.min(j + 2, expression.length()));
+							if characterAfterBracket.matches("(\\w|\\$)") {
+								extraSpace := " ";
+							}
+							
+							expression := expression.substring(0, i - objectName.length()) + actionPointerName + extraSpace + expression.substring(j + 1, expression.length());
+							i := i - objectName.length() + actionPointerName.length() - 1 + extraSpace.length();
 						}
 					}
 					j := j + 1;
@@ -639,6 +671,12 @@ event ExpressionCompiler {
 			"xor": Operators.logicalXor,
 			"or": Operators.logicalOr
 		};
+
+		// If the operator contains a character or a $ then we need it to be space separated
+		string spaceRequirement := "*";
+		if operator.search("(\\$|\\w)").size() > 0 {
+			spaceRequirement := "+";
+		}
 		
 		integer i := 0;
 		while i < expression.length() - (operator.length() - 1) {
@@ -646,9 +684,9 @@ event ExpressionCompiler {
 			string processedString := expression.substring(0, i);
 			string remainingString := expression.substring(i, expression.length());
 			if currentCharacter = operator {
-				optional<string> leftObject := firstMatch(processedString, "(\\$|\\w)+\\s*$");
+				optional<string> leftObject := firstMatch(processedString, "(\\$|\\w)+\\s" + spaceRequirement + "$");
 				ifpresent leftObject {
-					optional<string> rightObject := firstMatch(remainingString.substring(operator.length(), remainingString.length()), "^\\s*(\\$|\\w)+");
+					optional<string> rightObject := firstMatch(remainingString.substring(operator.length(), remainingString.length()), "^\\s" + spaceRequirement + "(\\$|\\w)+");
 					ifpresent rightObject {
 						string actionPointerName := "$_" + integer.getUnique().toString();
 						closureGetters.add(actionPointerName, OperatorHandler.create(operators[operator], closureGetters, leftObject.rtrim(), rightObject.ltrim()));
@@ -686,13 +724,19 @@ event ExpressionCompiler {
 		sequence<string> operators := ["not", "!"];
 		string operator;
 		for operator in operators {
+			// If the operator contains a character or a $ then we need it to be space separated
+			string spaceRequirement := "*";
+			if operator.search("(\\$|\\w)").size() > 0 {
+				spaceRequirement := "+";
+			}
+			
 			integer i := 0;
 			while i < expression.length() - (operator.length() - 1) {
 				string currentCharacter := expression.substring(i, i+operator.length());
 				string processedString := expression.substring(0, i);
 				string remainingString := expression.substring(i, expression.length());
 				if currentCharacter = operator {
-					optional<string> rightObject := firstMatch(remainingString.substring(operator.length(), remainingString.length()), "^\\s*(\\$|\\w)+");
+					optional<string> rightObject := firstMatch(remainingString.substring(operator.length(), remainingString.length()), "^\\s" + spaceRequirement + "(\\$|\\w)+");
 					ifpresent rightObject {
 						string actionPointerName := "$_" + integer.getUnique().toString();
 						closureGetters.add(actionPointerName, UnaryNegate.create(closureGetters, rightObject.ltrim()));
