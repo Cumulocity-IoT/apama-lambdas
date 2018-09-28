@@ -1,0 +1,33 @@
+package abc;
+
+using utils.TestRunner;
+
+event TestEvent {
+	action<> returns float f0;
+	action<float> returns float f1;
+	action<float, float> returns float f2;
+}
+
+monitor Test {  
+	action onload() {
+		TestRunner.create()
+			.addTest("t => t.f0()", [<any> TestEvent(f0, f1, f2)], 10.0, "zero arg field action")
+			.addTest("t => t.f1(10)", [<any> TestEvent(f0, f1, f2)], 11.0, "one arg field action")
+			.addTest("t => t.f1(10 + 3/2)", [<any> TestEvent(f0, f1, f2)], 12.5, "one arg field action, complex arg")
+			.addTest("t => t.f2(3.2, 6.8)", [<any> TestEvent(f0, f1, f2)], 10.0, "2 arg field action")
+		
+			.run();
+	}
+	
+	action f0() returns float {
+		return 10.0;
+	}
+	
+	action f1(float v) returns float {
+		return v + 1.0;
+	}
+	
+	action f2(float v1, float v2) returns float {
+		return v1 + v2;
+	}
+}
