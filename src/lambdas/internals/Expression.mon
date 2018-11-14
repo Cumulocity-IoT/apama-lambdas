@@ -281,20 +281,31 @@ event EventConstructor {
 	}
 }
 
-event FieldAccess {
+event FieldOrConstantAccess {
 	dictionary<string, action<> returns any> closureGetters;
 	string objectName;
 	action<> returns any fieldKey;
 	
 	static action create(dictionary<string, action<> returns any> closureGetters, string objectName, action<> returns any fieldKey) returns action<> returns any {
-		return FieldAccess(closureGetters, objectName, fieldKey).callback;
+		return FieldOrConstantAccess(closureGetters, objectName, fieldKey).callback;
 	}
 	
 	action callback() returns any {
 		if not closureGetters.hasKey(objectName) {
-			throw Exception("Unknown object: " + objectName, "CompilationException");
+			throw Exception("Unknown object: " + objectName, "RuntimeException");
 		}
-		return closureGetters[objectName]().getEntry(fieldKey());
+		any subject := closureGetters[objectName]();
+		any fieldOrConstantName := fieldKey();
+		try {
+			return subject.getEntry(fieldOrConstantName);
+		} catch (Exception e) {
+			// If the entry doesn't exist then it might be a constant
+			try {
+				return subject.getConstant(fieldOrConstantName.valueToString());
+			} catch (Exception e) {
+				throw Exception("Object: " + objectName + " does not have field or constant: " + fieldOrConstantName.valueToString(), "RuntimeException");
+			}
+		}
 	}
 }
 
@@ -608,12 +619,37 @@ event ExpressionCompiler {
 			string remainingString := expression.substring(i, expression.length());
 			if currentCharacter = "." { // Check for variables and/or methodCalls
 				string objectName := processedString.search("(\\$|\\w)+$")[0];
-				string fieldName := remainingString.substring(1, remainingString.length()).search("^(\\$|\\w)+")[0];
-				// TODO: handle methodCalling
-				string actionPointerName := "$_" + integer.getUnique().toString();
-				closureGetters.add(actionPointerName, FieldAccess.create(closureGetters, objectName, ValueGetter.create(fieldName)));
-				expression := expression.substring(0, i - objectName.length()) + actionPointerName + expression.substring(i + fieldName.length() + 1, expression.length());
-				i := i - objectName.length() + actionPointerName.length() - 1;
+				
+				if closureGetters.hasKey(objectName) {
+					string fieldName := remainingString.substring(1, remainingString.length()).search("^(\\$|\\w)+")[0];
+					// TODO: handle methodCalling
+					string actionPointerName := "$_" + integer.getUnique().toString();
+					closureGetters.add(actionPointerName, FieldOrConstantAccess.create(closureGetters, objectName, ValueGetter.create(fieldName)));
+					expression := expression.substring(0, i - objectName.length()) + actionPointerName + expression.substring(i + fieldName.length() + 1, expression.length());
+					i := i - objectName.length() + actionPointerName.length() - 1;
+				} else { 
+					// If we don't already know about the object then it's either constant access or an error
+					string remainingEventTypeName := remainingString.search("^(\\$|\\w|\\.)*(?=\\.)")[0];
+					string eventType := objectName + remainingEventTypeName;
+					
+					any constructedEvent;
+					try {
+						constructedEvent := any.newInstance(eventType);
+					} catch(Exception e) {
+						throw Exception("Unknown object or type: " + objectName, "CompilationException");	
+					}
+					string constantName := remainingString.substring(remainingEventTypeName.length() + 1, remainingString.length()).search("^(\\$|\\w)+")[0];
+					any constantValue;
+					try {
+						constantValue := constructedEvent.getConstant(constantName);
+					} catch(Exception e) {
+						throw Exception("Event: " + eventType + " does not have a constant: " + constantName, "CompilationException");
+					}
+					string actionPointerName := "$_" + integer.getUnique().toString();
+					closureGetters.add(actionPointerName, ValueGetter.create(constantValue));
+					expression := expression.substring(0, i - objectName.length()) + actionPointerName + expression.substring(i + remainingEventTypeName.length() + constantName.length() + 1, expression.length());					
+					i := i + eventType.length() - objectName.length() - 1;
+				}
 			} else if currentCharacter = "[" and i > 0 and expression.substring(i-1, i).matches("(\\$|\\w)") { // Check for fieldAccess via sqrBrackets
 				integer bracketCount := 1;
 				integer j := i + 1;
@@ -625,9 +661,13 @@ event ExpressionCompiler {
 						bracketCount := bracketCount - 1;
 						if bracketCount = 0 {
 							string objectName := processedString.search("(\\$|\\w)+$")[0];
+							if not closureGetters.hasKey(objectName) {
+								throw Exception("Unknown object: " + objectName, "CompilationException");
+							}
+							
 							string fieldKeyExp := expression.substring(i + 1, j);
 							string actionPointerName := "$_" + integer.getUnique().toString();
-							closureGetters.add(actionPointerName, FieldAccess.create(closureGetters, objectName, ExpressionCompiler.create(fieldKeyExp, closureGetters).compile()));
+							closureGetters.add(actionPointerName, FieldOrConstantAccess.create(closureGetters, objectName, ExpressionCompiler.create(fieldKeyExp, closureGetters).compile()));
 							
 							// Might have an operator (or, and, xor, not) directly after brackets so we space them out, but we want to avoid spacing if its an action call or field access
 							string extraSpace := "";
