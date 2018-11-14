@@ -1,0 +1,15 @@
+using utils.TestRunner;
+
+event Evt {
+	constant string value := "Hello";
+}
+
+monitor Test {  
+	action onload() {
+		TestRunner.create()
+			.addTest("x => x.value", [<any> Evt()], "Hello", "Instance constant value")
+			.addTest("Evt().value", new sequence<any>, "Hello", "Constructed instance constant value")
+			.addTest("Evt.value", new sequence<any>, "Hello", "Constant access directly from type")
+			.run();
+	}  
+}
