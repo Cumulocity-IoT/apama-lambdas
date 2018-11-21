@@ -166,7 +166,7 @@ Event names **must be fully qualified** (regardless of any `using` statements)
 Where possible automatic [coercion](#coercion) will occur for all fields.
 
 **Action Calling**<br/>
-Actions can be called on events as usual in EPL. Static actions are supported on events, but not on primitive or other reference types.
+Actions can be called on events as usual in EPL. Static actions are also supported.
 ```javascript
 Lambda.function1("x => x.round()")(10.2) = 10
 ```
