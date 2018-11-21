@@ -25,6 +25,9 @@ monitor Test {
 		
 			// This already worked - but it's nice to test
 			.addTest("abc.TestEvent(15).staticAction1(5.0)", new sequence<any>, 25.0, "one arg static action on constructed event")
+
+			.addTest("float.parse('3.14159')", new sequence<any>, 3.14159, "static action on builtin type - float.parse")
+			.addTest("context.current().getId()", new sequence<any>, context.current().getId(), "static action on builtin type - context.current")
 		
 			.run();
 	}

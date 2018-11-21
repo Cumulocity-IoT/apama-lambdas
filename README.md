@@ -1,4 +1,3 @@
-
 <!--- 
 Copyright 2018 Software AG
 
@@ -157,6 +156,12 @@ Lambda.function1("seq0 => seq0[0]")
 **Special Values**<br/>
 `currentTime` - The same as in EPL - Gets the current time in seconds (usually rounded to nearest 100ms) 
 
+**Constants**<br/>
+Constants can be accessed in the same way as in EPL, except that the event on which they are defined **must be fully qualified** (regardless of any `using` statements).
+```javascript
+Lambda.function1("x => com.example.MyEventType.MY_FIRST_CONSTANT")
+```
+
 **Event Construction**<br/>
 Events can be constructed in the standard epl form:
 ```javascript
@@ -166,7 +171,7 @@ Event names **must be fully qualified** (regardless of any `using` statements)
 Where possible automatic [coercion](#coercion) will occur for all fields.
 
 **Action Calling**<br/>
-Actions can be called on events as usual in EPL. Static actions are supported on events, but not on primitive or other reference types.
+Actions can be called on events as usual in EPL.
 ```javascript
 Lambda.function1("x => x.round()")(10.2) = 10
 ```
@@ -183,6 +188,19 @@ There are also some additional utility actions added to some types:
 |sequence|`.get(i)`|Get the value at index `i`|
 |sequence|`.getOr(i, alt)`|Get the value at index `i` or an alternative value if it does not exist|
 |sequence|`.getOrDefault(i)`|Get the value at index `i` or a default value if it does not exist|
+
+**Static Action Calling**<br/>
+Static actions are supported as in EPL. 
+
+They can be accessed from an event instance directly, or using the **fully qualified** event type.
+
+```javascript
+// Accessing from an event instance
+Lambda.function2("instance, x => instance.someStaticAction(x)")(new MyEvent, 10.2)
+
+// Access from the type
+Lambda.function1("x => com.example.MyEvent.someStaticAction(x)")(10.2)
+```
 
 **Sequence Literals**<br/>
 Sequences can be constructed in lambdas in much the same way that they can in EPL, except that they are always `sequence<any>`.
