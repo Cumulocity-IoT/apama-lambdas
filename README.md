@@ -18,7 +18,7 @@ This is a library that adds lambdas to [Apama](http://www.apamacommunity.com/).
 
 Lambdas in EPL (Apama's programming language) are closely based on Arrow Functions in JavaScript. They are inline actions that manipulate one or more provided values, implicitly returning the result.
 ```javascript
-action<any> returns any multiplyBy10:= Lambda.function1("x => x * 10");
+action<any> returns any multiplyBy10 := Lambda.function1("x => x * 10");
 
 multiplyBy10(1.5) = <any> 15.0;
 ```
