@@ -14,6 +14,8 @@ monitor Test {
 			.addTest("x => x[1234]", [<any> {1234:1}], 1, "Dictionary integer key field access")
 
 			.addTest("x => x[1]", [<any>[1,2,3]], 2, "Sequence value access")
+					
+			.addTest("xyz => xyz[0] / xyz[1]", [<any>[1,2,3]], 2, "Sequence value access")
 			.run();
 	}  
 }

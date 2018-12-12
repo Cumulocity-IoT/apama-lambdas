@@ -678,6 +678,7 @@ event ExpressionCompiler {
 							
 							expression := expression.substring(0, i - objectName.length()) + actionPointerName + extraSpace + expression.substring(j + 1, expression.length());
 							i := i - objectName.length() + actionPointerName.length() - 1 + extraSpace.length();
+							break;
 						}
 					}
 					j := j + 1;
