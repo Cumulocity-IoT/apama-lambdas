@@ -81,8 +81,11 @@ event Lambda {
 		for argName in args {
 			closureGetters.add(argName, Undefined.create(argName));	
 		}
-		for argName in destructuredArgs.keys() {
-			closureGetters.add(argName, Undefined.create(argName));	
+		sequence<string> dArgs;
+		for dArgs in destructuredArgs.values() {
+			for argName in dArgs {
+				closureGetters.add(argName, Undefined.create(argName));
+			}
 		}
 		
 		try {
