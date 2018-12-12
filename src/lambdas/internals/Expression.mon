@@ -647,8 +647,8 @@ event ExpressionCompiler {
 					}
 					string actionPointerName := "$_" + integer.getUnique().toString();
 					closureGetters.add(actionPointerName, ValueGetter.create(constantValue));
-					expression := expression.substring(0, i - objectName.length()) + actionPointerName + expression.substring(i + remainingEventTypeName.length() + constantName.length() + 1, expression.length());					
-					i := i + eventType.length() - objectName.length() - 1;
+					expression := expression.substring(0, i - objectName.length()) + actionPointerName + expression.substring(i + remainingEventTypeName.length() + constantName.length() + 1, expression.length());
+					i := i - objectName.length() + actionPointerName.length() - 1;
 				}
 			} else if currentCharacter = "[" and i > 0 and expression.substring(i-1, i).matches("(\\$|\\w)") { // Check for fieldAccess via sqrBrackets
 				integer bracketCount := 1;
