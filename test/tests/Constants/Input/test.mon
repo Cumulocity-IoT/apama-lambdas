@@ -10,6 +10,8 @@ monitor Test {
 			.addTest("x => x.value", [<any> Evt()], "Hello", "Instance constant value")
 			.addTest("Evt().value", new sequence<any>, "Hello", "Constructed instance constant value")
 			.addTest("Evt.value", new sequence<any>, "Hello", "Constant access directly from type")
+		
+			.addTest("true ? Evt.value : Evt.value", new sequence<any>, "Hello", "Defect: Constants not working with ternary operator, wrong i offset used when substituting for $_N action pointer")
 			.run();
 	}  
 }
