@@ -15,7 +15,7 @@ monitor Test {
 
 			.addTest("x => x[1]", [<any>[1,2,3]], 2, "Sequence value access")
 					
-			.addTest("xyz => xyz[0] / xyz[1]", [<any>[1,2,3]], 2, "Sequence value access")
+			.addTest("xyz => xyz[0] / xyz[1]", [<any>[5,2]], 2.5, "Sequence value access")
 			.run();
 	}  
 }
