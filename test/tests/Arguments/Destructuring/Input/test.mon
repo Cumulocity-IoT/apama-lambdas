@@ -7,6 +7,8 @@ monitor Test {
 			.addTest("[x, y], [i,j] => x + y + i + j", [<any>[1,2],[3,4]], 10, "Multiple destructuring")
 			.addTest("[x, y] => x", [<any>[1]], 1, "Destructuring missing")
 			.addTest("[x] => x", [<any>[1,2]], 1, "Destructuring partial")
+		
+			.addTest("[x] => integer.max(0, x)", [<any>[1]], 1, "Defect: not adding destructured args to arg list")
 			
 			.run();
 	}  
